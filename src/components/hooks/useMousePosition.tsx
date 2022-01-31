@@ -8,9 +8,20 @@ export const useMousePosition = () => {
     []
   );
 
-  const off = () => window.removeEventListener("mousemove", setFromEvent);
+  // const off = () => window.removeEventListener("mousemove", setFromEvent);
 
-  const on = () => window.addEventListener("mousemove", setFromEvent);
+  // const on = () => window.addEventListener("mousemove", setFromEvent);
+
+  const off = () => {
+    console.log("Turning off mousemove ");
+    window.removeEventListener("mousemove", setFromEvent);
+  };
+
+  const on = () => {
+    console.log("Turning on mousemove ");
+
+    window.addEventListener("mousemove", setFromEvent);
+  };
 
   useEffect(() => {
     on();

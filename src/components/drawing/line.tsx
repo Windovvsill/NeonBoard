@@ -20,6 +20,8 @@ const neonStyle = (color: string) => ({
             0 0 0.8rem ${color},
             0 0 2.8rem ${color},
             inset 0 0 1.3rem ${color}`,
+  border: `2px solid ${color}`,
+  borderRadius: 8,
 });
 
 const colors = {
@@ -58,7 +60,12 @@ const useGeometry = (coords: TCoords) => {
   };
 };
 
-export const LineI = ({ coords, onPositionUpdate }: ILineProps) => {
+export const LineI = ({
+  coords,
+  onPositionUpdate,
+  onDrawingSelect,
+  selected,
+}: ILineProps) => {
   if (!check(coords)) return null;
 
   const { hyp, height, width, top, left, rotation, theta, x, y, x2, y2 } =
@@ -72,35 +79,49 @@ export const LineI = ({ coords, onPositionUpdate }: ILineProps) => {
     hyp
   );
 
+  const selectedBorder = selected ? { border: `1px dotted red` } : {};
+
   return (
     <Draggable onPositionUpdate={onPositionUpdate} coords={coords}>
       <div>
         <div
           style={{
             position: "absolute",
-            top: y - (hyp - height) / 2,
-            left: x + width / 2,
-            width: `0`,
-            height: `${hyp}px`,
-            border: `2px solid ${colors.c}`,
-            borderRadius: 8,
+            top: y - (hyp - height) / 2 - 12,
+            left: x + width / 2 - 12,
+            width: 24,
+            height: `${24 + hyp + (hyp > 7 ? -9 : 9)}px`,
             transform: `rotate(${rotation}deg)`,
-            ...neonStyle(colors.c),
+            ...selectedBorder,
           }}
         />
         <div
+          style={{
+            position: "absolute",
+            top: y - (hyp - height) / 2,
+            left: x + width / 2,
+            width: `0`,
+            height: `${hyp + (hyp > 7 ? -9 : 9)}px`,
+            transform: `rotate(${rotation}deg)`,
+            ...neonStyle(colors.c),
+          }}
+          onClick={(event) => {
+            console.log("clicked on line");
+            event.stopPropagation();
+            onDrawingSelect();
+          }}
+        />
+        {/* <div
           style={{
             position: "absolute",
             top: y - (hyp - height) / 2 + height - 20,
             left: x + width / 2 + width - 20,
             width: 0,
             height: 20,
-            border: `2px solid ${colors.c}`,
-            borderRadius: 8,
             transform: `rotate(${rotation + 15}deg)`,
             ...neonStyle(colors.c),
           }}
-        />
+        /> */}
       </div>
     </Draggable>
   );
@@ -176,8 +197,6 @@ export const Box = memo(
               // width: `${x2 - x}px`,
               width: `0`,
               height: `${Math.abs(height)}px`,
-              border: `2px solid ${colors.a}`,
-              borderRadius: 8,
               ...neonStyle(colors.a),
             }}
           />
@@ -190,8 +209,6 @@ export const Box = memo(
               left,
               width: `${Math.abs(width)}px`,
               height: `0px`,
-              border: `2px solid ${colors.b}`,
-              borderRadius: 8,
               ...neonStyle(colors.b),
             }}
           />
@@ -204,8 +221,6 @@ export const Box = memo(
               left: x2,
               width: `0`,
               height: `${Math.abs(height)}px`,
-              border: `2px solid ${colors.c}`,
-              borderRadius: 8,
               ...neonStyle(colors.c),
             }}
           />
@@ -218,8 +233,6 @@ export const Box = memo(
               left,
               width: `${Math.abs(width)}px`,
               height: `0px`,
-              border: `2px solid ${colors.d}`,
-              borderRadius: 8,
               ...neonStyle(colors.d),
             }}
           />

@@ -18,8 +18,8 @@ const toolComponents = {
   [Tools.LINE]: Line,
   [Tools.BOX]: Box,
   [Tools.TEXT]: Text,
-  [Tools.CLEAR]: Text, // TODO
-  [Tools.POINTER]: Text, // TODO
+  [Tools.CLEAR]: null,
+  [Tools.POINTER]: null,
 };
 
 const Drawing = (
@@ -31,6 +31,7 @@ const Drawing = (
 ) => {
   const render = () => {
     const Comp = toolComponents[props.tool];
+    if (!Comp) return null;
     return <Comp {...props} key={props.id} />;
   };
 
@@ -71,7 +72,7 @@ export const Board = () => {
 
   const resetTool = (tool: Tools) => {
     setPendingCoords([]);
-    if (tool === "clear") {
+    if (tool === Tools.CLEAR) {
       setDrawings([]);
       return;
     }
@@ -134,9 +135,12 @@ export const Board = () => {
       }}
       onClick={onBoardClick}
     >
-      {tool}
-
-      {JSON.stringify(pendingCoords)}
+      {"tool: " +
+        tool +
+        " pending: " +
+        JSON.stringify(pendingCoords) +
+        " mouse " +
+        mousePosition.x}
 
       {drawings.map((d) => (
         <Drawing
