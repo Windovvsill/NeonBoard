@@ -1,9 +1,14 @@
-import React, { memo, useMemo } from "react";
+import React, { memo } from "react";
 import { IPosition } from "../../types/types";
+import { Draggable } from "../utility/Draggable";
 
 interface ILineProps {
   coords: [IPosition?, IPosition?];
   stopPropagation?: boolean;
+  id?: number;
+  onDrawingSelect: () => void;
+  selected: boolean;
+  onPositionUpdate: (position: [IPosition, IPosition]) => void;
 }
 
 type TCoords = [IPosition, IPosition];
@@ -26,7 +31,6 @@ const colors = {
 
 const useGeometry = (coords: TCoords) => {
   const [{ x, y }, { x: x2, y: y2 }] = coords;
-  console.log(x, y, x2, y2);
 
   const theta = degrees(coords);
   const rotation = theta + 90;
@@ -54,7 +58,7 @@ const useGeometry = (coords: TCoords) => {
   };
 };
 
-export const LineI = ({ coords }: ILineProps) => {
+export const LineI = ({ coords, onPositionUpdate }: ILineProps) => {
   if (!check(coords)) return null;
 
   const { hyp, height, width, top, left, rotation, theta, x, y, x2, y2 } =
@@ -69,34 +73,36 @@ export const LineI = ({ coords }: ILineProps) => {
   );
 
   return (
-    <>
-      <div
-        style={{
-          position: "absolute",
-          top: y - (hyp - height) / 2,
-          left: x + width / 2,
-          width: `0`,
-          height: `${hyp}px`,
-          border: `3px solid ${colors.c}`,
-          borderRadius: 8,
-          transform: `rotate(${rotation}deg)`,
-          ...neonStyle(colors.c),
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          top: y - (hyp - height) / 2 + height - 20,
-          left: x + width / 2 + width - 20,
-          width: 0,
-          height: 20,
-          border: `3px solid ${colors.c}`,
-          borderRadius: 8,
-          transform: `rotate(${rotation + 15}deg)`,
-          ...neonStyle(colors.c),
-        }}
-      />
-    </>
+    <Draggable onPositionUpdate={onPositionUpdate} coords={coords}>
+      <div>
+        <div
+          style={{
+            position: "absolute",
+            top: y - (hyp - height) / 2,
+            left: x + width / 2,
+            width: `0`,
+            height: `${hyp}px`,
+            border: `2px solid ${colors.c}`,
+            borderRadius: 8,
+            transform: `rotate(${rotation}deg)`,
+            ...neonStyle(colors.c),
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: y - (hyp - height) / 2 + height - 20,
+            left: x + width / 2 + width - 20,
+            width: 0,
+            height: 20,
+            border: `2px solid ${colors.c}`,
+            borderRadius: 8,
+            transform: `rotate(${rotation + 15}deg)`,
+            ...neonStyle(colors.c),
+          }}
+        />
+      </div>
+    </Draggable>
   );
 };
 
@@ -116,7 +122,7 @@ export const Text = memo(({ coords, stopPropagation }: ILineProps) => {
         left,
         width: Math.abs(width),
         height: Math.abs(height),
-        border: `3px solid ${colors.a}`,
+        border: `2px solid ${colors.a}`,
         borderRadius: 8,
         // ...neonStyle(colors.a),
       }}
@@ -124,77 +130,104 @@ export const Text = memo(({ coords, stopPropagation }: ILineProps) => {
   );
 });
 
-export const Box = memo(({ coords }: ILineProps) => {
-  if (!check(coords)) return null;
+export const Box = memo(
+  ({ coords, onDrawingSelect, selected, onPositionUpdate }: ILineProps) => {
+    if (!check(coords)) return null;
 
-  const { hyp, height, width, top, left, rotation, theta, x, y, x2, y2 } =
-    useGeometry(coords);
+    const { hyp, height, width, top, left, rotation, theta, x, y, x2, y2 } =
+      useGeometry(coords);
 
-  console.log(
-    "BOX rotation, degrees, height, hyp",
-    rotation,
-    theta,
-    height,
-    hyp
-  );
+    // console.log(
+    //   "BOX rotation, degrees, height, hyp",
+    //   rotation,
+    //   theta,
+    //   height,
+    //   hyp
+    // );
 
-  return (
-    <>
-      <div
-        style={{
-          position: "absolute",
-          top,
-          left: x,
-          // width: `${x2 - x}px`,
-          width: `0`,
-          height: `${Math.abs(height)}px`,
-          border: `3px solid ${colors.a}`,
-          borderRadius: 8,
-          ...neonStyle(colors.a),
-        }}
-      />
+    return (
+      <Draggable onPositionUpdate={onPositionUpdate} coords={coords}>
+        <div>
+          <div
+            style={{
+              position: "absolute",
+              top: top - 7,
+              left: left - 7,
+              width: `${Math.abs(width)}px`,
+              // width,
+              // height,
+              height: `${Math.abs(height)}px`,
+              padding: "8px",
+              border: selected ? `1px dotted red` : undefined,
+            }}
+            // draggable
+            onClick={(event) => {
+              console.log("clicked on box");
+              event.stopPropagation();
+              onDrawingSelect();
+            }}
+          ></div>
+          {/* left side */}
+          <div
+            style={{
+              position: "absolute",
+              top,
+              left: x,
+              // width: `${x2 - x}px`,
+              width: `0`,
+              height: `${Math.abs(height)}px`,
+              border: `2px solid ${colors.a}`,
+              borderRadius: 8,
+              ...neonStyle(colors.a),
+            }}
+          />
 
-      <div
-        style={{
-          position: "absolute",
-          top: y2,
-          left,
-          width: `${Math.abs(width)}px`,
-          height: `0px`,
-          border: `3px solid ${colors.b}`,
-          borderRadius: 8,
-          ...neonStyle(colors.b),
-        }}
-      />
+          {/* bottom */}
+          <div
+            style={{
+              position: "absolute",
+              top: y2,
+              left,
+              width: `${Math.abs(width)}px`,
+              height: `0px`,
+              border: `2px solid ${colors.b}`,
+              borderRadius: 8,
+              ...neonStyle(colors.b),
+            }}
+          />
 
-      <div
-        style={{
-          position: "absolute",
-          top,
-          left: x2,
-          width: `0`,
-          height: `${Math.abs(height)}px`,
-          border: `3px solid ${colors.c}`,
-          borderRadius: 8,
-          ...neonStyle(colors.c),
-        }}
-      />
+          {/* right */}
+          <div
+            style={{
+              position: "absolute",
+              top,
+              left: x2,
+              width: `0`,
+              height: `${Math.abs(height)}px`,
+              border: `2px solid ${colors.c}`,
+              borderRadius: 8,
+              ...neonStyle(colors.c),
+            }}
+          />
 
-      <div
-        style={{
-          position: "absolute",
-          top: y,
-          left,
-          width: `${Math.abs(width)}px`,
-          height: `0px`,
-          border: `3px solid ${colors.d}`,
-          borderRadius: 8,
-          ...neonStyle(colors.d),
-        }}
-      />
-    </>
-  );
-});
+          {/* top */}
+          <div
+            style={{
+              position: "absolute",
+              top: y,
+              left,
+              width: `${Math.abs(width)}px`,
+              height: `0px`,
+              border: `2px solid ${colors.d}`,
+              borderRadius: 8,
+              ...neonStyle(colors.d),
+            }}
+          />
+        </div>
+      </Draggable>
+    );
+  }
+);
 
 const degrees = ([{ x, y }, { x: x2, y: y2 }]: TCoords) =>
   (Math.atan2(y2 - y, x2 - x) * 180) / Math.PI;

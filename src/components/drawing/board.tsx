@@ -1,61 +1,50 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useEffect } from "react";
+import { Tools } from "../../types/enums";
 import { IPosition } from "../../types/types";
+import { useMousePosition } from "../hooks/useMousePosition";
 import { Line, Box, Text } from "./line";
 import { ToolBar } from "./toolBar";
 
-const useMousePosition = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  const setFromEvent = (e: MouseEvent) =>
-    setPosition({ x: e.clientX, y: e.clientY });
-
-  const off = () => window.removeEventListener("mousemove", setFromEvent);
-
-  const on = () => window.addEventListener("mousemove", setFromEvent);
-
-  useEffect(() => {
-    on();
-
-    return () => {
-      off();
-    };
-  }, []);
-
-  return { mousePosition: position, on, off };
-};
-
 interface IDrawing {
   coords: [IPosition?, IPosition?];
-  tool: string;
+  tool: Tools;
   stopPropagation?: boolean;
-  id?: number;
+  id: number;
+  // onDrawingSelect: () => void;
 }
 
-const Drawing = (props: IDrawing) => {
+const toolComponents = {
+  [Tools.LINE]: Line,
+  [Tools.BOX]: Box,
+  [Tools.TEXT]: Text,
+  [Tools.CLEAR]: Text, // TODO
+  [Tools.POINTER]: Text, // TODO
+};
+
+const Drawing = (
+  props: IDrawing & {
+    onDrawingSelect: () => void;
+    selected: boolean;
+    onPositionUpdate: (position: [IPosition, IPosition]) => void;
+  }
+) => {
   const render = () => {
-    switch (props.tool) {
-      case "line":
-        return <Line {...props} key={props.id} />;
-      case "box":
-        return <Box {...props} key={props.id} />;
-      case "text":
-        return <Text {...props} key={props.id} />;
-      default:
-        return null;
-    }
+    const Comp = toolComponents[props.tool];
+    return <Comp {...props} key={props.id} />;
   };
 
   return render();
 };
 
 export const Board = () => {
-  const [tool, setTool] = useState<string>("");
+  const [tool, setTool] = useState<Tools>(Tools.BOX);
   const [pendingCoords, setPendingCoords] = useState<[IPosition?, IPosition?]>(
     []
   );
 
   const [drawings, setDrawings] = useState<Array<IDrawing>>([]);
+  const [selectedDrawings, setSelectedDrawing] = useState<number>();
 
   const [tracking, setTracking] = useState(false);
 
@@ -73,7 +62,14 @@ export const Board = () => {
     tracking ? trackingOn() : trackingOff();
   }, [tracking]);
 
-  const resetTool = (tool: string) => {
+  useEffect(() => {
+    if (selectedDrawings) {
+      setPendingCoords([]);
+      setTracking(false);
+    }
+  }, [selectedDrawings]);
+
+  const resetTool = (tool: Tools) => {
     setPendingCoords([]);
     if (tool === "clear") {
       setDrawings([]);
@@ -93,6 +89,11 @@ export const Board = () => {
   }, [pendingCoords]);
 
   const onBoardClick = (e: any) => {
+    console.log("BOARD CAPTURED CLICK");
+    if (selectedDrawings !== undefined) {
+      setSelectedDrawing(undefined);
+      return;
+    }
     if (pendingCoords.length === 0) {
       return setPendingCoords([{ x: e.clientX, y: e.clientY }]);
     } else if (pendingCoords.length === 1) {
@@ -102,6 +103,27 @@ export const Board = () => {
       ]);
     }
   };
+
+  const onDrawingSelect = useCallback((id: number) => {
+    console.log("selected drawing ", id);
+    setSelectedDrawing(id);
+  }, []);
+
+  const updateSingleDrawingPosition = useCallback(
+    (id: number, position: [IPosition, IPosition]) => {
+      const t = drawings.find((d) => d.id === id);
+      console.log(
+        "message to update single drawing from:",
+        t?.coords,
+        "to",
+        position
+      );
+      setDrawings(
+        drawings.map((d) => (d.id === id ? { ...d, coords: position } : d))
+      );
+    },
+    [drawings]
+  );
 
   return (
     <div
@@ -117,15 +139,28 @@ export const Board = () => {
       {JSON.stringify(pendingCoords)}
 
       {drawings.map((d) => (
-        <Drawing {...d} key={d.id} />
+        <Drawing
+          {...d}
+          key={d.id}
+          onDrawingSelect={() => onDrawingSelect(d.id)}
+          selected={d.id === selectedDrawings}
+          onPositionUpdate={(coords) =>
+            updateSingleDrawingPosition(d.id, coords)
+          }
+        />
       ))}
 
-      {tracking &&
-        Drawing({
-          tool,
-          coords: [pendingCoords[0], mousePosition],
-          stopPropagation: false,
-        })}
+      {tracking && (
+        <Drawing
+          tool={tool}
+          coords={[pendingCoords[0], mousePosition]}
+          stopPropagation={false}
+          id={0}
+          selected={false}
+          onDrawingSelect={() => null}
+          onPositionUpdate={() => null}
+        />
+      )}
 
       <ToolBar onSelect={resetTool} />
     </div>

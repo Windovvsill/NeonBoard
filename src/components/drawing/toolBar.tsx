@@ -1,28 +1,33 @@
 import React from "react";
 import { useCallback } from "react";
 import { useEffect } from "react";
+import { Tools } from "../../types/enums";
 import { Column, Row } from "../library/container";
 
 interface IToolBarProps {
-  onSelect: (tool: string) => void;
+  onSelect: (tool: Tools) => void;
 }
 
 const tools = [
   {
     shortcut: "Digit0",
-    label: "clear",
+    label: Tools.CLEAR,
   },
   {
     shortcut: "Digit1",
-    label: "line",
+    label: Tools.LINE,
   },
   {
     shortcut: "Digit2",
-    label: "box",
+    label: Tools.BOX,
   },
   {
     shortcut: "Digit3",
-    label: "text",
+    label: Tools.TEXT,
+  },
+  {
+    shortcut: "Digit4",
+    label: Tools.POINTER,
   },
 ];
 
@@ -50,8 +55,8 @@ export const ToolBar = ({ onSelect }: IToolBarProps) => {
 };
 
 interface IToolButtonProps {
-  label: string;
-  onClick: (tool: string) => void;
+  label: Tools;
+  onClick: (tool: Tools) => void;
 }
 
 const ToolButton = ({ onClick, label }: IToolButtonProps) => {
