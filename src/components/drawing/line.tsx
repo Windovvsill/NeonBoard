@@ -1,6 +1,11 @@
+import { check } from "../../utils";
 import React, { memo } from "react";
-import { IPosition } from "../../types/types";
+import type { IFourSides, IPosition } from "../../types/types";
+import { useAnchors } from "../hooks/useAnchors";
 import { Draggable } from "../utility/Draggable";
+import { useGeometry } from "components/hooks/useGeometry";
+import { AnchorSet } from "./anchor";
+import { useTheme } from "components/ds/useTheme";
 
 interface ILineProps {
   coords: [IPosition?, IPosition?];
@@ -9,9 +14,8 @@ interface ILineProps {
   onDrawingSelect: () => void;
   selected: boolean;
   onPositionUpdate: (position: [IPosition, IPosition]) => void;
+  boardRef?: HTMLDivElement | null;
 }
-
-type TCoords = [IPosition, IPosition];
 
 const neonStyle = (color: string) => ({
   boxShadow: `0 0 .2rem #fff,
@@ -24,28 +28,15 @@ const neonStyle = (color: string) => ({
   borderRadius: 8,
 });
 
-const colors = {
-  a: "#0CECDD",
-  b: "#FFF338",
-  c: "#FF67E7",
-  d: "#C400FF",
-};
+export const LineI = (props: ILineProps) => {
+  const { coords, onPositionUpdate, onDrawingSelect, selected, boardRef } =
+    props;
 
-const useGeometry = (coords: TCoords) => {
-  const [{ x, y }, { x: x2, y: y2 }] = coords;
+  const theme = useTheme();
 
-  const theta = degrees(coords);
-  const rotation = theta + 90;
+  if (!check(coords)) return null;
 
-  const top = Math.min(y, y2);
-  const left = Math.min(x, x2);
-
-  const height = y2 - y;
-  const width = x2 - x;
-
-  const hyp = height / Math.sin(toRadians(theta));
-
-  return {
+  const {
     hyp,
     height,
     width,
@@ -53,23 +44,11 @@ const useGeometry = (coords: TCoords) => {
     left,
     rotation,
     theta,
+    bottom,
+    right,
     x,
     y,
-    x2,
-    y2,
-  };
-};
-
-export const LineI = ({
-  coords,
-  onPositionUpdate,
-  onDrawingSelect,
-  selected,
-}: ILineProps) => {
-  if (!check(coords)) return null;
-
-  const { hyp, height, width, top, left, rotation, theta, x, y, x2, y2 } =
-    useGeometry(coords);
+  } = useGeometry(coords);
 
   console.log(
     "LINE rotation, degrees, height, hyp",
@@ -81,9 +60,15 @@ export const LineI = ({
 
   const selectedBorder = selected ? { border: `1px dotted red` } : {};
 
+  const anchors = useAnchors({ anchorSize, coords });
+
   return (
-    <Draggable onPositionUpdate={onPositionUpdate} coords={coords}>
-      <div>
+    <div>
+      <Draggable
+        onPositionUpdate={onPositionUpdate}
+        coords={coords}
+        listenerNode={boardRef}
+      >
         <div
           style={{
             position: "absolute",
@@ -94,42 +79,48 @@ export const LineI = ({
             transform: `rotate(${rotation}deg)`,
             ...selectedBorder,
           }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            top: y - (hyp - height) / 2,
-            left: x + width / 2,
-            width: `0`,
-            height: `${hyp + (hyp > 7 ? -9 : 9)}px`,
-            transform: `rotate(${rotation}deg)`,
-            ...neonStyle(colors.c),
-          }}
           onClick={(event) => {
             console.log("clicked on line");
             event.stopPropagation();
             onDrawingSelect();
           }}
         />
-        {/* <div
-          style={{
-            position: "absolute",
-            top: y - (hyp - height) / 2 + height - 20,
-            left: x + width / 2 + width - 20,
-            width: 0,
-            height: 20,
-            transform: `rotate(${rotation + 15}deg)`,
-            ...neonStyle(colors.c),
-          }}
-        /> */}
-      </div>
-    </Draggable>
+      </Draggable>
+
+      <div
+        style={{
+          position: "absolute",
+          top: y - (hyp - height) / 2,
+          left: x + width / 2,
+          width: `0`,
+          height: `${hyp}px`,
+          transform: `rotate(${rotation}deg)`,
+          ...neonStyle(theme.neonTubeC),
+        }}
+      />
+
+      {selected && (
+        <AnchorSet
+          anchors={anchors}
+          top={top}
+          left={left}
+          right={right}
+          bottom={bottom}
+          anchorSize={anchorSize}
+          anchorStyle={neonStyle(theme.anchor)}
+          boardRef={boardRef}
+          {...props}
+        />
+      )}
+    </div>
   );
 };
 
 export const Line = memo(LineI);
 
 export const Text = memo(({ coords, stopPropagation }: ILineProps) => {
+  const theme = useTheme();
+
   if (!check(coords)) return null;
 
   const { hyp, height, width, top, left } = useGeometry(coords);
@@ -143,110 +134,117 @@ export const Text = memo(({ coords, stopPropagation }: ILineProps) => {
         left,
         width: Math.abs(width),
         height: Math.abs(height),
-        border: `2px solid ${colors.a}`,
+        border: `2px solid ${theme.neonTubeA}`,
         borderRadius: 8,
+        backgroundColor: "#ffffffff",
         // ...neonStyle(colors.a),
       }}
     />
   );
 });
 
-export const Box = memo(
-  ({ coords, onDrawingSelect, selected, onPositionUpdate }: ILineProps) => {
-    if (!check(coords)) return null;
+const anchorSize = 12;
 
-    const { hyp, height, width, top, left, rotation, theta, x, y, x2, y2 } =
-      useGeometry(coords);
+export const Box = memo((props: ILineProps) => {
+  const { coords, onDrawingSelect, boardRef, selected, onPositionUpdate } =
+    props;
 
-    // console.log(
-    //   "BOX rotation, degrees, height, hyp",
-    //   rotation,
-    //   theta,
-    //   height,
-    //   hyp
-    // );
+  const theme = useTheme();
 
-    return (
-      <Draggable onPositionUpdate={onPositionUpdate} coords={coords}>
-        <div>
-          <div
-            style={{
-              position: "absolute",
-              top: top - 7,
-              left: left - 7,
-              width: `${Math.abs(width)}px`,
-              // width,
-              // height,
-              height: `${Math.abs(height)}px`,
-              padding: "8px",
-              border: selected ? `1px dotted red` : undefined,
-            }}
-            // draggable
-            onClick={(event) => {
-              console.log("clicked on box");
-              event.stopPropagation();
-              onDrawingSelect();
-            }}
-          ></div>
-          {/* left side */}
-          <div
-            style={{
-              position: "absolute",
-              top,
-              left: x,
-              // width: `${x2 - x}px`,
-              width: `0`,
-              height: `${Math.abs(height)}px`,
-              ...neonStyle(colors.a),
-            }}
-          />
+  if (!check(coords)) return null;
 
-          {/* bottom */}
-          <div
-            style={{
-              position: "absolute",
-              top: y2,
-              left,
-              width: `${Math.abs(width)}px`,
-              height: `0px`,
-              ...neonStyle(colors.b),
-            }}
-          />
+  const { height, width, ...restOfGeo } = useGeometry(coords);
 
-          {/* right */}
-          <div
-            style={{
-              position: "absolute",
-              top,
-              left: x2,
-              width: `0`,
-              height: `${Math.abs(height)}px`,
-              ...neonStyle(colors.c),
-            }}
-          />
+  const { top, left } = restOfGeo;
 
-          {/* top */}
-          <div
-            style={{
-              position: "absolute",
-              top: y,
-              left,
-              width: `${Math.abs(width)}px`,
-              height: `0px`,
-              ...neonStyle(colors.d),
-            }}
-          />
-        </div>
+  const anchors = useAnchors({ anchorSize, coords });
+
+  return (
+    <div>
+      <Draggable
+        onPositionUpdate={(e) => {
+          console.log("box drag");
+          onPositionUpdate(e);
+        }}
+        coords={coords}
+        listenerNode={boardRef}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: top - 7,
+            left: left - 7,
+            width: `${Math.abs(width)}px`,
+            // width,
+            // height,
+            height: `${Math.abs(height)}px`,
+            padding: "8px",
+            border: selected ? `1px dotted red` : undefined,
+          }}
+          onClick={(event) => {
+            console.log("clicked on box");
+            event.stopPropagation();
+            onDrawingSelect();
+          }}
+        ></div>
       </Draggable>
-    );
-  }
-);
 
-const degrees = ([{ x, y }, { x: x2, y: y2 }]: TCoords) =>
-  (Math.atan2(y2 - y, x2 - x) * 180) / Math.PI;
+      <SideLine alignment="top" {...restOfGeo} width={width} height={height} />
+      <SideLine alignment="left" {...restOfGeo} width={width} height={height} />
+      <SideLine
+        alignment="right"
+        {...restOfGeo}
+        width={width}
+        height={height}
+      />
+      <SideLine
+        alignment="bottom"
+        {...restOfGeo}
+        width={width}
+        height={height}
+      />
+      {selected && (
+        <AnchorSet
+          anchors={anchors}
+          {...props}
+          {...restOfGeo}
+          anchorSize={anchorSize}
+          anchorStyle={neonStyle(theme.anchor)}
+        />
+      )}
+    </div>
+  );
+});
 
-const check = (tuple: [IPosition?, IPosition?]): tuple is TCoords => {
-  return !!(tuple?.[0] && tuple?.[1]);
+interface ISideLineProps {
+  alignment: "top" | "bottom" | "right" | "left";
+  width: number;
+  height: number;
+}
+
+const SideLine = ({
+  alignment,
+  top,
+  left,
+  bottom,
+  right,
+  width,
+  height,
+}: ISideLineProps & IFourSides) => {
+  const theme = useTheme();
+
+  const isVertical = alignment === "left" || alignment === "right";
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: alignment === "bottom" ? bottom : top,
+        left: alignment === "right" ? right : left,
+        width: isVertical ? 0 : Math.abs(width),
+        height: !isVertical ? 0 : Math.abs(height),
+        ...neonStyle(theme.neonTubeA),
+      }}
+    />
+  );
 };
-
-const toRadians = (theta: number) => theta * (Math.PI / 180);

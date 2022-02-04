@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useEffect } from "react";
 import { Tools } from "../../types/enums";
 import { IPosition } from "../../types/types";
@@ -27,6 +27,8 @@ const Drawing = (
     onDrawingSelect: () => void;
     selected: boolean;
     onPositionUpdate: (position: [IPosition, IPosition]) => void;
+
+    boardRef?: HTMLDivElement | null;
   }
 ) => {
   const render = () => {
@@ -48,6 +50,8 @@ export const Board = () => {
   const [selectedDrawings, setSelectedDrawing] = useState<number>();
 
   const [tracking, setTracking] = useState(false);
+
+  const boardRef = useRef<HTMLDivElement>(null);
 
   const {
     mousePosition,
@@ -133,6 +137,7 @@ export const Board = () => {
         width: "100vw",
         backgroundColor: "#000000",
       }}
+      ref={boardRef}
       onClick={onBoardClick}
     >
       {"tool: " +
@@ -145,6 +150,7 @@ export const Board = () => {
       {drawings.map((d) => (
         <Drawing
           {...d}
+          boardRef={boardRef.current}
           key={d.id}
           onDrawingSelect={() => onDrawingSelect(d.id)}
           selected={d.id === selectedDrawings}
