@@ -13,12 +13,14 @@ interface IDraggableProps {
   children: any;
   onPositionUpdate: (position: [IPosition, IPosition]) => void;
   coords: [IPosition?, IPosition?];
+  listenerNode?: HTMLDivElement | null;
 }
 
 export const Draggable = ({
   children,
   onPositionUpdate,
   coords,
+  listenerNode,
 }: IDraggableProps) => {
   const node = useRef<HTMLDivElement>();
 
@@ -39,7 +41,7 @@ export const Draggable = ({
   useEffect(() => {
     const onDrag = ({ clientX, clientY }: MouseEvent) => {
       console.log(
-        "ondrag, dragfrom:",
+        "&ondrag, dragfrom:",
         dragFrom,
         "mouse position",
         clientX,
@@ -48,9 +50,12 @@ export const Draggable = ({
       updateOffset({ clientX, clientY });
     };
 
-    if (dragFrom) node.current?.addEventListener("mousemove", onDrag);
-    else node.current?.removeEventListener("mousemove", onDrag);
-    return () => node.current?.removeEventListener("mousemove", onDrag);
+    // const n = findDOMNode(this);
+    const thisNode = listenerNode || node.current;
+
+    if (dragFrom) thisNode?.addEventListener("mousemove", onDrag);
+    else thisNode?.removeEventListener("mousemove", onDrag);
+    return () => thisNode?.removeEventListener("mousemove", onDrag);
   }, [dragFrom]);
 
   const updateOffset = ({
@@ -85,7 +90,7 @@ export const Draggable = ({
     }
   };
 
-  const onDragEnd = () => {
+  const onDragEnd = (e: MouseEvent) => {
     setDragFrom(null);
   };
 
