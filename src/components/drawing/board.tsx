@@ -47,7 +47,7 @@ export const Board = () => {
   );
 
   const [drawings, setDrawings] = useState<Array<IDrawing>>([]);
-  const [selectedDrawings, setSelectedDrawing] = useState<number>();
+  const [selectedDrawing, setSelectedDrawing] = useState<number>();
 
   const [tracking, setTracking] = useState(false);
 
@@ -68,11 +68,11 @@ export const Board = () => {
   }, [tracking]);
 
   useEffect(() => {
-    if (selectedDrawings) {
+    if (selectedDrawing) {
       setPendingCoords([]);
       setTracking(false);
     }
-  }, [selectedDrawings]);
+  }, [selectedDrawing]);
 
   const resetTool = (tool: Tools) => {
     setPendingCoords([]);
@@ -95,7 +95,7 @@ export const Board = () => {
 
   const onBoardClick = (e: any) => {
     console.log("BOARD CAPTURED CLICK");
-    if (selectedDrawings !== undefined) {
+    if (selectedDrawing !== undefined) {
       setSelectedDrawing(undefined);
       return;
     }
@@ -141,20 +141,13 @@ export const Board = () => {
       ref={boardRef}
       onClick={onBoardClick}
     >
-      {"tool: " +
-        tool +
-        " pending: " +
-        JSON.stringify(pendingCoords) +
-        " mouse " +
-        mousePosition.x}
-
       {drawings.map((d) => (
         <Drawing
           {...d}
           boardRef={boardRef.current}
           key={d.id}
           onDrawingSelect={() => onDrawingSelect(d.id)}
-          selected={d.id === selectedDrawings}
+          selected={d.id === selectedDrawing}
           onPositionUpdate={(coords) =>
             updateSingleDrawingPosition(d.id, coords)
           }
@@ -173,7 +166,13 @@ export const Board = () => {
         />
       )}
 
-      <ToolBar onSelect={resetTool} />
+      <ToolBar onSelect={resetTool} selected={tool} />
+      {"tool: " +
+        tool +
+        " pending: " +
+        JSON.stringify(pendingCoords) +
+        " mouse " +
+        mousePosition.x}
     </div>
   );
 };

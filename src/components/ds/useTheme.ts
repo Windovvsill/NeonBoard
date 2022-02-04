@@ -52,3 +52,14 @@ export const useTheme = () => {
 
   return themeMap[colorMode][theme];
 };
+
+export const neonBorder = (color: string) => ({
+  boxShadow: `0 0 .2rem #fff,
+              0 0 .2rem #fff,
+              0 0 2rem ${color},
+              0 0 0.8rem ${color},
+              0 0 2.8rem ${color},
+              inset 0 0 1.3rem ${color}`,
+  border: `2px solid ${color}`,
+  borderRadius: 8,
+});

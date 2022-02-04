@@ -1,3 +1,4 @@
+import { neonBorder, useTheme } from "components/ds/useTheme";
 import React from "react";
 import { useCallback } from "react";
 import { useEffect } from "react";
@@ -6,6 +7,7 @@ import { Column, Row } from "../library/container";
 
 interface IToolBarProps {
   onSelect: (tool: Tools) => void;
+  selected: Tools;
 }
 
 const tools = [
@@ -31,7 +33,7 @@ const tools = [
   },
 ];
 
-export const ToolBar = ({ onSelect }: IToolBarProps) => {
+export const ToolBar = ({ onSelect, selected }: IToolBarProps) => {
   const onKeyDown = useCallback((ev: KeyboardEvent) => {
     const tool = tools.find((t) => t.shortcut === ev.code);
     if (tool) onSelect(tool.label);
@@ -47,7 +49,11 @@ export const ToolBar = ({ onSelect }: IToolBarProps) => {
     <Row onClick={(e: MouseEvent) => e.stopPropagation()}>
       {tools.map((t) => (
         <Column key={t.label}>
-          <ToolButton onClick={onSelect} label={t.label} />
+          <ToolButton
+            onClick={onSelect}
+            label={t.label}
+            selected={t.label === selected}
+          />
         </Column>
       ))}
     </Row>
@@ -57,8 +63,21 @@ export const ToolBar = ({ onSelect }: IToolBarProps) => {
 interface IToolButtonProps {
   label: Tools;
   onClick: (tool: Tools) => void;
+  selected: boolean;
 }
 
-const ToolButton = ({ onClick, label }: IToolButtonProps) => {
-  return <button onClick={() => onClick(label)}>{label}</button>;
+const ToolButton = ({ onClick, label, selected }: IToolButtonProps) => {
+  const theme = useTheme();
+  return (
+    <button
+      style={{
+        ...neonBorder(selected ? theme.neonTubeD : theme.neonTubeC),
+        height: 60,
+        width: 60,
+      }}
+      onClick={() => onClick(label)}
+    >
+      {label}
+    </button>
+  );
 };

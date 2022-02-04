@@ -5,7 +5,7 @@ import { useAnchors } from "../hooks/useAnchors";
 import { Draggable } from "../utility/Draggable";
 import { useGeometry } from "components/hooks/useGeometry";
 import { AnchorSet } from "./anchor";
-import { useTheme } from "components/ds/useTheme";
+import { neonBorder, useTheme } from "components/ds/useTheme";
 
 interface ILineProps {
   coords: [IPosition?, IPosition?];
@@ -16,17 +16,6 @@ interface ILineProps {
   onPositionUpdate: (position: [IPosition, IPosition]) => void;
   boardRef?: HTMLDivElement | null;
 }
-
-const neonStyle = (color: string) => ({
-  boxShadow: `0 0 .2rem #fff,
-            0 0 .2rem #fff,
-            0 0 2rem ${color},
-            0 0 0.8rem ${color},
-            0 0 2.8rem ${color},
-            inset 0 0 1.3rem ${color}`,
-  border: `2px solid ${color}`,
-  borderRadius: 8,
-});
 
 export const LineI = (props: ILineProps) => {
   const { coords, onPositionUpdate, onDrawingSelect, selected, boardRef } =
@@ -97,7 +86,7 @@ export const LineI = (props: ILineProps) => {
           width: `0`,
           height: `${hyp}px`,
           transform: `rotate(${rotation}deg)`,
-          ...neonStyle(theme.neonTubeC),
+          ...neonBorder(theme.neonTubeC),
         }}
       />
 
@@ -109,7 +98,7 @@ export const LineI = (props: ILineProps) => {
           right={right}
           bottom={bottom}
           anchorSize={anchorSize}
-          anchorStyle={neonStyle(theme.anchor)}
+          anchorStyle={neonBorder(theme.anchor)}
           boardRef={boardRef}
           {...props}
         />
@@ -211,7 +200,7 @@ export const Box = memo((props: ILineProps) => {
           {...props}
           {...restOfGeo}
           anchorSize={anchorSize}
-          anchorStyle={neonStyle(theme.anchor)}
+          anchorStyle={neonBorder(theme.anchor)}
         />
       )}
     </div>
@@ -245,7 +234,7 @@ const SideLine = ({
         left: alignment === "right" ? right : left,
         width: isVertical ? 0 : Math.abs(width),
         height: !isVertical ? 0 : Math.abs(height),
-        ...neonStyle(theme.neonTubeA),
+        ...neonBorder(theme.neonTubeA),
       }}
     />
   );
