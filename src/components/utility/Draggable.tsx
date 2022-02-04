@@ -1,16 +1,8 @@
-import React, {
-  FC,
-  PureComponent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { findDOMNode } from "react-dom";
+import React, { useEffect, useRef, useState } from "react";
 import { IPosition } from "../../types/types";
 
 interface IDraggableProps {
-  children: any;
+  children: React.ReactElement;
   onPositionUpdate: (position: [IPosition, IPosition]) => void;
   coords: [IPosition?, IPosition?];
   listenerNode?: HTMLDivElement | null;
@@ -90,7 +82,7 @@ export const Draggable = ({
     }
   };
 
-  const onDragEnd = (e: MouseEvent) => {
+  const onDragEnd = () => {
     setDragFrom(null);
   };
 
