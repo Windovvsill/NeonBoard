@@ -11,7 +11,6 @@ interface IDrawing {
   tool: Tools;
   stopPropagation?: boolean;
   id: number;
-  // onDrawingSelect: () => void;
 }
 
 const toolComponents = {
@@ -93,7 +92,7 @@ export const Board = () => {
     }
   }, [pendingCoords]);
 
-  const onBoardClick = (e: any) => {
+  const onBoardClick = (e: { clientX: number; clientY: number }) => {
     console.log("BOARD CAPTURED CLICK");
     if (selectedDrawing !== undefined) {
       setSelectedDrawing(undefined);

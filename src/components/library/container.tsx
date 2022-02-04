@@ -5,7 +5,7 @@ const paddingScales = [0, 4, 16, 32];
 
 interface LayoutProps {
   paddingScale?: number;
-  onClick?: (e: any) => void;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 const flexBase = (paddingScale?: number) => ({

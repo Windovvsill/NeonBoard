@@ -46,7 +46,7 @@ export const ToolBar = ({ onSelect, selected }: IToolBarProps) => {
   });
 
   return (
-    <Row onClick={(e: MouseEvent) => e.stopPropagation()}>
+    <Row onClick={(e) => e.stopPropagation()}>
       {tools.map((t) => (
         <Column key={t.label}>
           <ToolButton

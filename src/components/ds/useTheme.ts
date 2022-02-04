@@ -47,8 +47,9 @@ const themeMap: TModedTheme = {
 };
 
 export const useTheme = () => {
-  const [colorMode, setColorMode] = useState(ColorModes.DARK);
-  const [theme, setTheme] = useState<keyof IThemeSet>("default");
+  // For future use
+  const [colorMode] = useState(ColorModes.DARK);
+  const [theme] = useState<keyof IThemeSet>("default");
 
   return themeMap[colorMode][theme];
 };

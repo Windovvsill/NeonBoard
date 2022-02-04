@@ -114,7 +114,7 @@ export const Text = memo(({ coords, stopPropagation }: ILineProps) => {
 
   if (!check(coords)) return null;
 
-  const { hyp, height, width, top, left } = useGeometry(coords);
+  const { height, width, top, left } = useGeometry(coords);
 
   return (
     <textarea
