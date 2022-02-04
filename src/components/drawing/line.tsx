@@ -58,7 +58,9 @@ export const LineI = (props: ILineProps) => {
     hyp
   );
 
-  const selectedBorder = selected ? { border: `1px dotted red` } : {};
+  const selectedBorder = selected
+    ? { border: `1px dotted ${theme.neonTubeD}` }
+    : {};
 
   const anchors = useAnchors({ anchorSize, coords });
 
@@ -179,7 +181,7 @@ export const Box = memo((props: ILineProps) => {
             // height,
             height: `${Math.abs(height)}px`,
             padding: "8px",
-            border: selected ? `1px dotted red` : undefined,
+            border: selected ? `1px dotted ${theme.neonTubeC}` : undefined,
           }}
           onClick={(event) => {
             console.log("clicked on box");

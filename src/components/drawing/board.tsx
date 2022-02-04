@@ -136,6 +136,7 @@ export const Board = () => {
         height: "100vh",
         width: "100vw",
         backgroundColor: "#000000",
+        backgroundImage: `radial-gradient( circle 964.7px at 10% 20%,  rgba(0,0,12,1) 0%, rgba(10,10,10,1) 44%, rgba(12,12,22,1) 100.1% )`,
       }}
       ref={boardRef}
       onClick={onBoardClick}
