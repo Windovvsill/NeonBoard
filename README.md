@@ -7,3 +7,5 @@ A neon themed whitebaord for quick sketching and diagramming.
 Pure React.
 
 ![Screenshot](docs/screenshot.png)
+
+[Live Demo](https://neonboard.ca)

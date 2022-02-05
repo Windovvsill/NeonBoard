@@ -1,3 +1,4 @@
+import { usePrevious } from "components/hooks/usePrevious";
 import React, { useCallback, useRef, useState } from "react";
 import { useEffect } from "react";
 import { Tools } from "../../types/enums";
@@ -20,6 +21,8 @@ const toolComponents = {
   [Tools.CLEAR]: null,
   [Tools.POINTER]: null,
 };
+
+const DELETE_KEYS = ["Delete", "Backspace"];
 
 const Drawing = (
   props: IDrawing & {
@@ -47,6 +50,7 @@ export const Board = () => {
 
   const [drawings, setDrawings] = useState<Array<IDrawing>>([]);
   const [selectedDrawing, setSelectedDrawing] = useState<number>();
+  const previousSelectedDrawing = usePrevious(selectedDrawing);
 
   const [tracking, setTracking] = useState(false);
 
@@ -84,11 +88,10 @@ export const Board = () => {
 
   useEffect(() => {
     if (pendingCoords.length === 2) {
-      setDrawings((d) => [
-        ...d,
-        { tool, coords: pendingCoords, id: Date.now() },
-      ]);
+      const id = Date.now();
+      setDrawings((d) => [...d, { tool, coords: pendingCoords, id }]);
       setPendingCoords([]);
+      setSelectedDrawing(id);
     }
   }, [pendingCoords]);
 
@@ -108,8 +111,28 @@ export const Board = () => {
     }
   };
 
+  useEffect(() => {
+    const onKeyDown = (ev: KeyboardEvent) => {
+      if (DELETE_KEYS.includes(ev.key)) {
+        selectedDrawing && removeDrawing(selectedDrawing);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  });
+
+  const removeDrawing = (id: number) => {
+    setDrawings((d) => d.filter((dd) => dd.id !== id));
+  };
+
   const onDrawingSelect = useCallback((id: number) => {
-    console.log("selected drawing ", id);
+    if (
+      previousSelectedDrawing &&
+      drawings.find((dd) => dd.id === previousSelectedDrawing)?.tool ===
+        Tools.TEXT
+    ) {
+      removeDrawing(previousSelectedDrawing);
+    }
     setSelectedDrawing(id);
   }, []);
 
@@ -134,8 +157,10 @@ export const Board = () => {
       style={{
         height: "100vh",
         width: "100vw",
+        padding: 0,
+        margin: 0,
         backgroundColor: "#000000",
-        backgroundImage: `radial-gradient( circle 964.7px at 10% 20%,  rgba(0,0,12,1) 0%, rgba(10,10,10,1) 44%, rgba(12,12,22,1) 100.1% )`,
+        backgroundImage: `radial-gradient( circle 964.7px at 10% 20%,  rgba(0,0,12,1) 0%, rgba(10,10,7,1) 44%, rgba(12,12,22,1) 100.1% )`,
       }}
       ref={boardRef}
       onClick={onBoardClick}

@@ -42,7 +42,7 @@ export const ToolBar = ({ onSelect, selected }: IToolBarProps) => {
 
   useEffect(() => {
     document.addEventListener("keypress", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keypress", onKeyDown);
   });
 
   return (

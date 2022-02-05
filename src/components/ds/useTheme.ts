@@ -64,3 +64,12 @@ export const neonBorder = (color: string) => ({
   border: `2px solid ${color}`,
   borderRadius: 8,
 });
+
+export const selectedBorder = (selected: boolean, color: string) =>
+  selected
+    ? {
+        borderWidth: "1px",
+        borderStyle: "dotted",
+        borderColor: color,
+      }
+    : {};

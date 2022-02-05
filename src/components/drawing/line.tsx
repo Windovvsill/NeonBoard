@@ -5,7 +5,7 @@ import { useAnchors } from "../hooks/useAnchors";
 import { Draggable } from "../utility/Draggable";
 import { useGeometry } from "components/hooks/useGeometry";
 import { AnchorSet } from "./anchor";
-import { neonBorder, useTheme } from "components/ds/useTheme";
+import { neonBorder, selectedBorder, useTheme } from "components/ds/useTheme";
 
 interface ILineProps {
   coords: [IPosition?, IPosition?];
@@ -47,10 +47,6 @@ export const LineI = (props: ILineProps) => {
     hyp
   );
 
-  const selectedBorder = selected
-    ? { border: `1px dotted ${theme.neonTubeD}` }
-    : {};
-
   const anchors = useAnchors({ anchorSize, coords });
 
   return (
@@ -68,7 +64,7 @@ export const LineI = (props: ILineProps) => {
             width: 24,
             height: `${24 + hyp + (hyp > 7 ? -9 : 9)}px`,
             transform: `rotate(${rotation}deg)`,
-            ...selectedBorder,
+            ...selectedBorder(selected, theme.neonTubeD),
           }}
           onClick={(event) => {
             console.log("clicked on line");
@@ -109,28 +105,59 @@ export const LineI = (props: ILineProps) => {
 
 export const Line = memo(LineI);
 
-export const Text = memo(({ coords, stopPropagation }: ILineProps) => {
+export const Text = memo((props: ILineProps) => {
+  const { coords, onDrawingSelect, stopPropagation, selected } = props;
+
   const theme = useTheme();
 
   if (!check(coords)) return null;
 
-  const { height, width, top, left } = useGeometry(coords);
+  const { height, width, ...restOfGeo } = useGeometry(coords);
+  const { top, left } = restOfGeo;
+
+  const anchors = useAnchors({ anchorSize, coords });
 
   return (
-    <textarea
-      onClick={(e) => (stopPropagation === false ? null : e.stopPropagation())}
-      style={{
-        position: "absolute",
-        top,
-        left,
-        width: Math.abs(width),
-        height: Math.abs(height),
-        border: `2px solid ${theme.neonTubeA}`,
-        borderRadius: 8,
-        backgroundColor: "#ffffffff",
-        // ...neonStyle(colors.a),
-      }}
-    />
+    <div>
+      {selected && (
+        <AnchorSet
+          anchors={anchors}
+          {...props}
+          {...restOfGeo}
+          anchorStyle={neonBorder(theme.anchor)}
+          anchorSize={anchorSize}
+        />
+      )}
+      <Draggable
+        coords={coords}
+        listenerNode={props.boardRef}
+        onPositionUpdate={props.onPositionUpdate}
+      >
+        <textarea
+          onClick={(e) => {
+            onDrawingSelect();
+            stopPropagation === false ? null : e.stopPropagation();
+          }}
+          style={{
+            resize: "none",
+            position: "absolute",
+            top,
+            left,
+            width: Math.abs(width),
+            height: Math.abs(height),
+            // border: `2px solid ${theme.neonTubeA}`,
+            // borderRadius: 8,
+            borderColor: "transparent",
+            borderStyle: "none",
+            outline: "none",
+            overflow: "auto",
+            backgroundColor: "#ffffff00",
+            color: theme.primaryText,
+            ...selectedBorder(selected, theme.neonTubeD),
+          }}
+        />
+      </Draggable>
+    </div>
   );
 });
 
@@ -170,7 +197,7 @@ export const Box = memo((props: ILineProps) => {
             // height,
             height: `${Math.abs(height)}px`,
             padding: "8px",
-            border: selected ? `1px dotted ${theme.neonTubeC}` : undefined,
+            ...selectedBorder(selected, theme.neonTubeC),
           }}
           onClick={(event) => {
             console.log("clicked on box");
