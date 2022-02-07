@@ -3,5 +3,6 @@ export const enum Tools {
   BOX = "box",
   TEXT = "text",
   CLEAR = "clear",
-  POINTER = "pointer",
+  POINTER = "cursor",
+  ARROW = "arrow",
 }

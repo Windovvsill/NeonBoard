@@ -6,6 +6,7 @@ interface IDraggableProps {
   onPositionUpdate: (position: [IPosition, IPosition]) => void;
   coords: [IPosition?, IPosition?];
   listenerNode?: HTMLDivElement | null;
+  bypass?: boolean;
 }
 
 export const Draggable = ({
@@ -13,6 +14,7 @@ export const Draggable = ({
   onPositionUpdate,
   coords,
   listenerNode,
+  bypass = false,
 }: IDraggableProps) => {
   const node = useRef<HTMLDivElement>();
 
@@ -85,6 +87,8 @@ export const Draggable = ({
   const onDragEnd = () => {
     setDragFrom(null);
   };
+
+  if (bypass) return React.cloneElement(React.Children.only(children), {});
 
   return React.cloneElement(React.Children.only(children), {
     ref: node,

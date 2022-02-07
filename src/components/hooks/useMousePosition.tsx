@@ -8,13 +8,10 @@ export const useMousePosition = () => {
     []
   );
 
-  // const off = () => window.removeEventListener("mousemove", setFromEvent);
-
-  // const on = () => window.addEventListener("mousemove", setFromEvent);
-
   const off = () => {
     console.log("Turning off mousemove ");
     window.removeEventListener("mousemove", setFromEvent);
+    setPosition({ x: 0, y: 0 });
   };
 
   const on = () => {

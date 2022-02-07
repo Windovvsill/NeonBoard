@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { Tools } from "../../types/enums";
 import { IPosition } from "../../types/types";
 import { useMousePosition } from "../hooks/useMousePosition";
-import { Line, Box, Text } from "./line";
+import { Line, Box, Text, ArrowLine } from "./line";
 import { ToolBar } from "./toolBar";
 
 interface IDrawing {
@@ -12,6 +12,7 @@ interface IDrawing {
   tool: Tools;
   stopPropagation?: boolean;
   id: number;
+  text?: string;
 }
 
 const toolComponents = {
@@ -20,6 +21,7 @@ const toolComponents = {
   [Tools.TEXT]: Text,
   [Tools.CLEAR]: null,
   [Tools.POINTER]: null,
+  [Tools.ARROW]: ArrowLine,
 };
 
 const DELETE_KEYS = ["Delete", "Backspace"];
@@ -190,13 +192,50 @@ export const Board = () => {
         />
       )}
 
-      <ToolBar onSelect={resetTool} selected={tool} />
-      {"tool: " +
-        tool +
-        " pending: " +
+      <ToolBar
+        onSelect={resetTool}
+        selected={tool}
+        onImport={(content, filetype) => {
+          if (!content) return;
+          console.log(content);
+          setDrawings(excalidrawAdaptor(content.toString()));
+        }}
+      />
+      {" pending: " +
         JSON.stringify(pendingCoords) +
         " mouse " +
         mousePosition.x}
     </div>
   );
+};
+
+const excalidrawAdaptor = (ex: string) => {
+  const o = JSON.parse(ex);
+  const toolTo = (type: string) => {
+    switch (type) {
+      case "rectangle":
+        return Tools.BOX;
+      case "text":
+        return Tools.TEXT;
+      case "line":
+        return Tools.LINE;
+      case "arrow":
+        return Tools.ARROW;
+      default:
+        return null;
+    }
+  };
+  const oo = o.elements
+    .filter((e: any) => toolTo(e.type))
+    .map((e: any) => ({
+      coords: [
+        { x: e.x, y: e.y },
+        { x: e.x + e.width, y: e.y + e.height },
+      ],
+      tool: toolTo(e.type),
+      id: e.id,
+      text: e.text,
+    }));
+
+  return oo;
 };

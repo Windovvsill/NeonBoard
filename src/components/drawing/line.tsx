@@ -1,4 +1,4 @@
-import { check } from "../../utils";
+import { check, toRadians } from "../../utils";
 import React, { memo } from "react";
 import type { IFourSides, IPosition } from "../../types/types";
 import { useAnchors } from "../hooks/useAnchors";
@@ -15,11 +15,60 @@ interface ILineProps {
   selected: boolean;
   onPositionUpdate: (position: [IPosition, IPosition]) => void;
   boardRef?: HTMLDivElement | null;
+  interactive?: boolean;
+
+  text?: string;
 }
 
-export const LineI = (props: ILineProps) => {
+const ArrowLineI = (props: ILineProps) => {
   const { coords, onPositionUpdate, onDrawingSelect, selected, boardRef } =
     props;
+
+  const theme = useTheme();
+
+  if (!check(coords)) return null;
+
+  const { theta } = useGeometry(coords);
+
+  const containerWidth = 24;
+  const halfContainer = containerWidth / 2;
+  const headAngle = 45 / 2;
+
+  const r = 24;
+
+  const ax = r * Math.sin(toRadians(180 - theta + 45 + headAngle));
+  const ay = r * Math.cos(toRadians(180 - theta + 45 + headAngle));
+  const ax2 = r * Math.sin(toRadians(180 - theta + 90 + headAngle));
+  const ay2 = r * Math.cos(toRadians(180 - theta + 90 + headAngle));
+
+  return (
+    <div>
+      <Line {...props} />
+      <Line
+        {...props}
+        coords={[{ x: coords[1].x + ax2, y: coords[1].y + ay2 }, coords[1]]}
+        interactive={false}
+      />
+      <Line
+        {...props}
+        coords={[{ x: coords[1].x + ax, y: coords[1].y + ay }, coords[1]]}
+        interactive={false}
+      />
+    </div>
+  );
+};
+
+export const ArrowLine = memo(ArrowLineI);
+
+export const LineI = (props: ILineProps) => {
+  const {
+    coords,
+    onPositionUpdate,
+    onDrawingSelect,
+    selected,
+    boardRef,
+    interactive = true,
+  } = props;
 
   const theme = useTheme();
 
@@ -37,17 +86,14 @@ export const LineI = (props: ILineProps) => {
     right,
     x,
     y,
+    x2,
+    y2,
   } = useGeometry(coords);
 
-  console.log(
-    "LINE rotation, degrees, height, hyp",
-    rotation,
-    theta,
-    height,
-    hyp
-  );
-
   const anchors = useAnchors({ anchorSize, coords });
+
+  const containerWidth = 24;
+  const halfContainer = containerWidth / 2;
 
   return (
     <div>
@@ -55,25 +101,26 @@ export const LineI = (props: ILineProps) => {
         onPositionUpdate={onPositionUpdate}
         coords={coords}
         listenerNode={boardRef}
+        bypass={!interactive}
       >
         <div
           style={{
             position: "absolute",
-            top: y - (hyp - height) / 2 - 12,
-            left: x + width / 2 - 12,
-            width: 24,
-            height: `${24 + hyp + (hyp > 7 ? -9 : 9)}px`,
+            top: y - (hyp - height) / 2 - halfContainer,
+            left: x + width / 2 - halfContainer,
+            width: containerWidth,
+            height: `${containerWidth + hyp}px`,
             transform: `rotate(${rotation}deg)`,
-            ...selectedBorder(selected, theme.neonTubeD),
+            ...selectedBorder(interactive && selected, theme.neonTubeD),
           }}
           onClick={(event) => {
-            console.log("clicked on line");
+            if (!interactive) return;
+            console.log("| LINE CLICK clicked on line");
             event.stopPropagation();
             onDrawingSelect();
           }}
         />
       </Draggable>
-
       <div
         style={{
           position: "absolute",
@@ -82,11 +129,12 @@ export const LineI = (props: ILineProps) => {
           width: `0`,
           height: `${hyp}px`,
           transform: `rotate(${rotation}deg)`,
+          backgroundColor: theme.neonTubeC,
           ...neonBorder(theme.neonTubeC),
         }}
       />
 
-      {selected && (
+      {selected && interactive && (
         <AnchorSet
           anchors={anchors}
           top={top}
@@ -104,62 +152,6 @@ export const LineI = (props: ILineProps) => {
 };
 
 export const Line = memo(LineI);
-
-export const Text = memo((props: ILineProps) => {
-  const { coords, onDrawingSelect, stopPropagation, selected } = props;
-
-  const theme = useTheme();
-
-  if (!check(coords)) return null;
-
-  const { height, width, ...restOfGeo } = useGeometry(coords);
-  const { top, left } = restOfGeo;
-
-  const anchors = useAnchors({ anchorSize, coords });
-
-  return (
-    <div>
-      {selected && (
-        <AnchorSet
-          anchors={anchors}
-          {...props}
-          {...restOfGeo}
-          anchorStyle={neonBorder(theme.anchor)}
-          anchorSize={anchorSize}
-        />
-      )}
-      <Draggable
-        coords={coords}
-        listenerNode={props.boardRef}
-        onPositionUpdate={props.onPositionUpdate}
-      >
-        <textarea
-          onClick={(e) => {
-            onDrawingSelect();
-            stopPropagation === false ? null : e.stopPropagation();
-          }}
-          style={{
-            resize: "none",
-            position: "absolute",
-            top,
-            left,
-            width: Math.abs(width),
-            height: Math.abs(height),
-            // border: `2px solid ${theme.neonTubeA}`,
-            // borderRadius: 8,
-            borderColor: "transparent",
-            borderStyle: "none",
-            outline: "none",
-            overflow: "auto",
-            backgroundColor: "#ffffff00",
-            color: theme.primaryText,
-            ...selectedBorder(selected, theme.neonTubeD),
-          }}
-        />
-      </Draggable>
-    </div>
-  );
-});
 
 const anchorSize = 12;
 
@@ -261,8 +253,66 @@ const SideLine = ({
         left: alignment === "right" ? right : left,
         width: isVertical ? 0 : Math.abs(width),
         height: !isVertical ? 0 : Math.abs(height),
+        backgroundColor: theme.neonTubeA,
         ...neonBorder(theme.neonTubeA),
       }}
     />
   );
 };
+
+export const Text = memo((props: ILineProps) => {
+  const { coords, onDrawingSelect, stopPropagation, selected, text } = props;
+
+  const theme = useTheme();
+
+  if (!check(coords)) return null;
+
+  const { height, width, ...restOfGeo } = useGeometry(coords);
+  const { top, left } = restOfGeo;
+
+  const anchors = useAnchors({ anchorSize, coords });
+
+  return (
+    <div>
+      {selected && (
+        <AnchorSet
+          anchors={anchors}
+          {...props}
+          {...restOfGeo}
+          anchorStyle={neonBorder(theme.anchor)}
+          anchorSize={anchorSize}
+        />
+      )}
+      <Draggable
+        coords={coords}
+        listenerNode={props.boardRef}
+        onPositionUpdate={props.onPositionUpdate}
+      >
+        <textarea
+          onClick={(e) => {
+            onDrawingSelect();
+            stopPropagation === false ? null : e.stopPropagation();
+          }}
+          value={text}
+          style={{
+            resize: "none",
+            position: "absolute",
+            top,
+            left,
+            width: Math.abs(width),
+            height: Math.abs(height),
+            // border: `2px solid ${theme.neonTubeA}`,
+            // borderRadius: 8,
+            borderColor: "transparent",
+            borderStyle: "none",
+            outline: "none",
+            overflow: "auto",
+            backgroundColor: "#ffffff00",
+            color: theme.primaryText,
+            ...selectedBorder(selected, theme.neonTubeD),
+          }}
+        />
+      </Draggable>
+    </div>
+  );
+});
