@@ -65,13 +65,6 @@ export const ToolBar = ({ onSelect, selected, onImport }: IToolBarProps) => {
         </Column>
       ))}
       <Column key={"import"}>
-        <ToolButton
-          onClick={onSelect}
-          label={"import" as Tools}
-          selected={false}
-        />
-      </Column>
-      <Column>
         <button
           onClick={async () => {
             const selectFile = async (
@@ -83,7 +76,7 @@ export const ToolBar = ({ onSelect, selected, onImport }: IToolBarProps) => {
                 input.multiple = false;
                 input.accept = contentType;
 
-                input.onchange = (_) => {
+                input.onchange = () => {
                   resolve(input.files);
                 };
 

@@ -196,6 +196,7 @@ export const Board = () => {
         onSelect={resetTool}
         selected={tool}
         onImport={(content, filetype) => {
+          console.log(filetype);
           if (!content) return;
           console.log(content);
           setDrawings(excalidrawAdaptor(content.toString()));
@@ -225,9 +226,20 @@ const excalidrawAdaptor = (ex: string) => {
         return null;
     }
   };
+
+  type ExcalibdrawElement = {
+    x: number;
+    y: number;
+    height: number;
+    width: number;
+    type: string;
+    id: string;
+    text?: string;
+  };
+
   const oo = o.elements
-    .filter((e: any) => toolTo(e.type))
-    .map((e: any) => ({
+    .filter((e: { type: string }) => toolTo(e.type))
+    .map((e: ExcalibdrawElement) => ({
       coords: [
         { x: e.x, y: e.y },
         { x: e.x + e.width, y: e.y + e.height },

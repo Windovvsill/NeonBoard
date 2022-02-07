@@ -21,17 +21,14 @@ interface ILineProps {
 }
 
 const ArrowLineI = (props: ILineProps) => {
-  const { coords, onPositionUpdate, onDrawingSelect, selected, boardRef } =
-    props;
+  const { coords } = props;
 
-  const theme = useTheme();
+  // const theme = useTheme();
 
   if (!check(coords)) return null;
 
   const { theta } = useGeometry(coords);
 
-  const containerWidth = 24;
-  const halfContainer = containerWidth / 2;
   const headAngle = 45 / 2;
 
   const r = 24;
@@ -74,21 +71,8 @@ export const LineI = (props: ILineProps) => {
 
   if (!check(coords)) return null;
 
-  const {
-    hyp,
-    height,
-    width,
-    top,
-    left,
-    rotation,
-    theta,
-    bottom,
-    right,
-    x,
-    y,
-    x2,
-    y2,
-  } = useGeometry(coords);
+  const { hyp, height, width, top, left, rotation, bottom, right, x, y } =
+    useGeometry(coords);
 
   const anchors = useAnchors({ anchorSize, coords });
 
