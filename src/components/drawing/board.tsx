@@ -1,19 +1,12 @@
 import { usePrevious } from "components/hooks/usePrevious";
+import { importData } from "io/import";
 import React, { useCallback, useRef, useState } from "react";
 import { useEffect } from "react";
 import { Tools } from "../../types/enums";
-import { IPosition } from "../../types/types";
+import type { Id, IDrawing, IPosition } from "../../types/types";
 import { useMousePosition } from "../hooks/useMousePosition";
 import { Line, Box, Text, ArrowLine } from "./line";
 import { ToolBar } from "./toolBar";
-
-interface IDrawing {
-  coords: [IPosition?, IPosition?];
-  tool: Tools;
-  stopPropagation?: boolean;
-  id: number;
-  text?: string;
-}
 
 const toolComponents = {
   [Tools.LINE]: Line,
@@ -31,12 +24,11 @@ const Drawing = (
     onDrawingSelect: () => void;
     selected: boolean;
     onPositionUpdate: (position: [IPosition, IPosition]) => void;
-
     boardRef?: HTMLDivElement | null;
   }
 ) => {
   const render = () => {
-    const Comp = toolComponents[props.tool];
+    const Comp = toolComponents[props.tool as Tools];
     if (!Comp) return null;
     return <Comp {...props} key={props.id} />;
   };
@@ -51,7 +43,7 @@ export const Board = () => {
   );
 
   const [drawings, setDrawings] = useState<Array<IDrawing>>([]);
-  const [selectedDrawing, setSelectedDrawing] = useState<number>();
+  const [selectedDrawing, setSelectedDrawing] = useState<Id>();
   const previousSelectedDrawing = usePrevious(selectedDrawing);
 
   const [tracking, setTracking] = useState(false);
@@ -123,11 +115,11 @@ export const Board = () => {
     return () => document.removeEventListener("keydown", onKeyDown);
   });
 
-  const removeDrawing = (id: number) => {
+  const removeDrawing = (id: Id) => {
     setDrawings((d) => d.filter((dd) => dd.id !== id));
   };
 
-  const onDrawingSelect = useCallback((id: number) => {
+  const onDrawingSelect = useCallback((id: Id) => {
     if (
       previousSelectedDrawing &&
       drawings.find((dd) => dd.id === previousSelectedDrawing)?.tool ===
@@ -139,7 +131,7 @@ export const Board = () => {
   }, []);
 
   const updateSingleDrawingPosition = useCallback(
-    (id: number, position: [IPosition, IPosition]) => {
+    (id: Id, position: [IPosition, IPosition]) => {
       const t = drawings.find((d) => d.id === id);
       console.log(
         "message to update single drawing from:",
@@ -197,9 +189,8 @@ export const Board = () => {
         selected={tool}
         onImport={(content, filetype) => {
           console.log(filetype);
-          if (!content) return;
-          console.log(content);
-          setDrawings(excalidrawAdaptor(content.toString()));
+          if (!content || !filetype) return;
+          setDrawings(importData(filetype, content.toString()));
         }}
       />
       {" pending: " +
@@ -210,44 +201,15 @@ export const Board = () => {
   );
 };
 
-const excalidrawAdaptor = (ex: string) => {
-  const o = JSON.parse(ex);
-  const toolTo = (type: string) => {
-    switch (type) {
-      case "rectangle":
-        return Tools.BOX;
-      case "text":
-        return Tools.TEXT;
-      case "line":
-        return Tools.LINE;
-      case "arrow":
-        return Tools.ARROW;
-      default:
-        return null;
-    }
-  };
+// const connect = () => {
+//   const ws = new WebSocket("localhost:12345", "tcp");
+//   ws.onopen = function (event) {
+//     ws.send("Here's some text that the server is urgently awaiting!");
+//   };
 
-  type ExcalibdrawElement = {
-    x: number;
-    y: number;
-    height: number;
-    width: number;
-    type: string;
-    id: string;
-    text?: string;
-  };
+//   ws.onmessage?.((m) => {
+//     console.log(m.data);
+//   });
+// };
 
-  const oo = o.elements
-    .filter((e: { type: string }) => toolTo(e.type))
-    .map((e: ExcalibdrawElement) => ({
-      coords: [
-        { x: e.x, y: e.y },
-        { x: e.x + e.width, y: e.y + e.height },
-      ],
-      tool: toolTo(e.type),
-      id: e.id,
-      text: e.text,
-    }));
-
-  return oo;
-};
+// connect();

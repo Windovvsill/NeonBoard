@@ -1,4 +1,6 @@
-export interface IPosition {
+export type Id = string | number;
+
+interface IPosition {
   x: number;
   y: number;
 }
@@ -35,4 +37,12 @@ interface IFourSides {
   left: number;
   right: number;
   bottom: number;
+}
+
+interface IDrawing {
+  coords: TCoordsPartial;
+  tool: Tools;
+  stopPropagation?: boolean;
+  id: Id;
+  text?: string;
 }

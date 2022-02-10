@@ -1,6 +1,6 @@
 import { check, toRadians } from "../../utils";
 import React, { memo } from "react";
-import type { IFourSides, IPosition } from "../../types/types";
+import type { Id, IFourSides, IPosition } from "../../types/types";
 import { useAnchors } from "../hooks/useAnchors";
 import { Draggable } from "../utility/Draggable";
 import { useGeometry } from "components/hooks/useGeometry";
@@ -10,13 +10,12 @@ import { neonBorder, selectedBorder, useTheme } from "components/ds/useTheme";
 interface ILineProps {
   coords: [IPosition?, IPosition?];
   stopPropagation?: boolean;
-  id?: number;
+  id?: Id;
   onDrawingSelect: () => void;
   selected: boolean;
   onPositionUpdate: (position: [IPosition, IPosition]) => void;
   boardRef?: HTMLDivElement | null;
   interactive?: boolean;
-
   text?: string;
 }
 
