@@ -1,6 +1,7 @@
+import { colors } from "components/ds";
 import { usePrevious } from "components/hooks/usePrevious";
 import { importData } from "io/import";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useId, useRef, useState } from "react";
 import { useEffect } from "react";
 import { Tools } from "../../types/enums";
 import type { Id, IDrawing, IPosition } from "../../types/types";
@@ -19,6 +20,12 @@ const toolComponents = {
 
 const DELETE_KEYS = ["Delete", "Backspace"];
 
+const colorList = Object.values(colors);
+
+const reconcileColor = (n: number) => {
+  return colorList[n % colorList.length];
+};
+
 const Drawing = (
   props: IDrawing & {
     onDrawingSelect: () => void;
@@ -36,7 +43,19 @@ const Drawing = (
   return render();
 };
 
+type EventType = string;
+
+interface Event {
+  joinOrder: number;
+  type: EventType;
+  boardId: string;
+  eventId: string;
+  mousePosition: { x: number; y: number };
+}
+
 export const Board = () => {
+  const boardId = useId();
+
   const [tool, setTool] = useState<Tools>(Tools.BOX);
   const [pendingCoords, setPendingCoords] = useState<[IPosition?, IPosition?]>(
     []
@@ -50,6 +69,29 @@ export const Board = () => {
 
   const boardRef = useRef<HTMLDivElement>(null);
 
+  const [collabIds, setCollabIds] = useState<{
+    [k: string]: { joinOrder: number };
+  }>({});
+
+  const [collabMice, setCollabMice] = useState<{
+    [k: string]: { x: number; y: number };
+  }>({});
+
+  const { send, close, open, isOpen } = useConnection({
+    collabChange: (action: Event) => {
+      setCollabIds((ids) => ({
+        ...ids,
+        [action.boardId]: { joinOrder: action.joinOrder },
+      }));
+    },
+    rtMousePosition: (action: Event) => {
+      setCollabMice((ids) => ({
+        ...ids,
+        [action.boardId]: action.mousePosition,
+      }));
+    },
+  });
+
   const {
     mousePosition,
     on: trackingOn,
@@ -57,8 +99,23 @@ export const Board = () => {
   } = useMousePosition();
 
   useEffect(() => {
-    setTracking(pendingCoords.length === 1);
-  }, [pendingCoords]);
+    if (isOpen) sendEvent("rtMousePosition", { mousePosition });
+  }, [isOpen, mousePosition]);
+
+  const sendEvent = (type: EventType, payload: object) => {
+    const event = JSON.stringify({
+      boardId,
+      eventId: String(Math.random()), // TODO: ????
+      ...payload,
+      type,
+    });
+    send(event);
+  };
+
+  useEffect(() => {
+    isOpen ? trackingOn() : trackingOff();
+    sendEvent("collabChange", {});
+  }, [isOpen]);
 
   useEffect(() => {
     tracking ? trackingOn() : trackingOff();
@@ -81,6 +138,8 @@ export const Board = () => {
   };
 
   useEffect(() => {
+    setTracking(pendingCoords.length === 1);
+
     if (pendingCoords.length === 2) {
       const id = Date.now();
       setDrawings((d) => [...d, { tool, coords: pendingCoords, id }]);
@@ -166,9 +225,14 @@ export const Board = () => {
           key={d.id}
           onDrawingSelect={() => onDrawingSelect(d.id)}
           selected={d.id === selectedDrawing}
-          onPositionUpdate={(coords) =>
-            updateSingleDrawingPosition(d.id, coords)
-          }
+          onPositionUpdate={(coords) => {
+            console.log(typeof d.id, d.id, coords);
+            sendEvent("updateSingleDrawingPosition", {
+              drawingId: d.id,
+              coords,
+            });
+            updateSingleDrawingPosition(d.id, coords);
+          }}
         />
       ))}
 
@@ -196,20 +260,121 @@ export const Board = () => {
       {" pending: " +
         JSON.stringify(pendingCoords) +
         " mouse " +
-        mousePosition.x}
+        mousePosition.x +
+        " boardId " +
+        boardId}
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        <button disabled={isOpen} onClick={() => open()}>
+          {"open"}
+        </button>
+        <button disabled={!isOpen} onClick={() => close()}>
+          {"close"}
+        </button>
+        <button onClick={() => sendEvent("ping", { type: "ping" })}>
+          {"send"}
+        </button>
+        {Object.entries(collabMice).map(([id, c]) => {
+          // const color = reconcileColor(collabIds[id].joinOrder ?? 0);
+          return (
+            <div
+              style={{
+                position: "absolute",
+                top: c.y,
+                left: c.x,
+                width: "28px",
+                // Ignore clicks!
+                pointerEvents: "none",
+              }}
+            >
+              <svg
+                version="1.1"
+                id="Layer_1"
+                xmlns="http://www.w3.org/2000/svg"
+                x="0px"
+                xmlSpace="preserve"
+                xmlnsXlink="http://www.w3.org/1999/xlink"
+                y="0px"
+                viewBox="0 0 28 28"
+                enableBackground="new 0 0 28 28"
+              >
+                <polygon
+                  fill={"#fff"}
+                  points="8.2,20.9 8.2,4.9 19.8,16.5 13,16.5 12.6,16.6 "
+                />
+                <polygon
+                  fill="#0ff"
+                  points="17.3,21.6 13.7,23.1 9,12 12.7,10.5 "
+                />
+                <rect
+                  fill="#f0f"
+                  x="12.5"
+                  y="13.6"
+                  transform="matrix(0.9221 -0.3871 0.3871 0.9221 -5.7605 6.5909)"
+                  width="2"
+                  height="8"
+                />
+                <polygon
+                  fill="#fff"
+                  points="9.2,7.3 9.2,18.5 12.2,15.6 12.6,15.5 17.4,15.5 "
+                />
+              </svg>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
 
-// const connect = () => {
-//   const ws = new WebSocket("localhost:12345", "tcp");
-//   ws.onopen = function (event) {
-//     ws.send("Here's some text that the server is urgently awaiting!");
-//   };
+const useConnection = (subscriptions: any) => {
+  const socket = useRef<WebSocket>();
 
-//   ws.onmessage?.((m) => {
-//     console.log(m.data);
-//   });
-// };
+  // const ready = () => socket.current?.OPEN === 1;
+  const [ready, setReady] = useState(false);
 
-// connect();
+  const close = () => {
+    socket.current?.close();
+    setReady(false);
+  };
+
+  const open = () => {
+    console.log("creating localhost:5000");
+
+    socket.current = new WebSocket("ws://localhost:5000/ws");
+
+    // Connection opened
+    socket.current.addEventListener("open", (event) => {
+      setReady(true);
+      console.log("socket opened");
+    });
+
+    socket.current.addEventListener("close", (event) => {
+      console.log("closing connection");
+      setReady(false);
+    });
+
+    // Listen for messages
+    socket.current.addEventListener("message", (event) => {
+      const p = JSON.parse(event.data);
+      console.log("Got message from server ", event.data, p);
+      if (!p) return;
+      subscriptions[p?.type]?.(p);
+    });
+
+    socket.current.addEventListener("error", (event) => {
+      console.error(event);
+    });
+  };
+
+  const send = (event: string) => {
+    if (!ready) return;
+    console.log("Sending payload:", event);
+    socket.current?.send(event);
+  };
+
+  return { send, close, open, isOpen: ready };
+};

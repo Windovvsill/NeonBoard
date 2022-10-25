@@ -1,9 +1,9 @@
-import React from "react";
-import { FC } from "react";
+import React, { ReactNode } from "react";
 
 const paddingScales = [0, 4, 16, 32];
 
 interface LayoutProps {
+  children: ReactNode;
   paddingScale?: number;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
@@ -17,18 +17,17 @@ const flexBase = (paddingScale?: number) => ({
   display: "flex",
 });
 
-const FlexElement: (flexDirection: "row" | "column") => FC<LayoutProps> =
-  () =>
-  ({ children, paddingScale, onClick }) => {
+const FlexElement =
+  (flexDirection: "row" | "column") => (props: LayoutProps) => {
     return (
       <div
         style={{
-          flexDirection: "row",
-          ...flexBase(paddingScale),
+          flexDirection,
+          ...flexBase(props.paddingScale),
         }}
-        onClick={onClick}
+        onClick={props.onClick}
       >
-        {children}
+        {props.children}
       </div>
     );
   };
