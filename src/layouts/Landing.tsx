@@ -1,9 +1,9 @@
-import React from "react";
-import { FC } from "react";
+import { PanicProvider } from "contexts/PanicContext";
+import React, { ReactNode } from "react";
 import { Board } from "../components/drawing/board";
 import { Row } from "../components/library/container";
 
-export const LandingContainer: FC = ({ children }) => {
+export const LandingContainer = (props: { children?: ReactNode }) => {
   return (
     <div
       style={{
@@ -12,10 +12,12 @@ export const LandingContainer: FC = ({ children }) => {
         backgroundColor: "#000000",
       }}
     >
-      <Row>
-        <Board />
+      <Row paddingScale={0}>
+        <PanicProvider>
+          <Board />
+        </PanicProvider>
       </Row>
-      {children}
+      {props.children}
     </div>
   );
 };
