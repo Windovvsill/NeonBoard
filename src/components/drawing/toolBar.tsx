@@ -117,7 +117,7 @@ const ToolButton = ({ onClick, label, selected }: IToolButtonProps) => {
       style={{
         ...neonBorder(
           selected ? theme.neonTubeB : theme.neonTubeC,
-          selected ? 2 : 0.5
+          selected ? 2 : 1
         ),
         height: 60,
         width: 60,

@@ -54,18 +54,23 @@ export const useTheme = () => {
   return themeMap[colorMode][theme];
 };
 
-export const neonBorder = (color: string, glow = 1) => ({
-  boxShadow: `0 0 ${glow / 5}rem #fff,
-              0 0 ${glow / 5}rem #fff,
-              0 0 ${glow * 2}rem ${color},
-              0 0 ${glow * 0.8}rem ${color},
-              0 0 ${glow * 2.8}rem ${color},
-              inset 0 0 ${glow * 1.3}rem ${color}`,
-  borderWidth: "2px",
-  borderStyle: "solid",
-  borderColor: color,
-  borderRadius: 8,
-});
+const glowBase = 4;
+
+export const neonBorder = (color: string, glowLevel: 0 | 1 | 2 | 3 = 1) => {
+  const glow = glowBase * glowLevel;
+  return {
+    boxShadow: `0 0 ${glow / 5}px #fff,
+              0 0 ${glow / 5}px #fff,
+              0 0 ${glow * 2}px ${color},
+              0 0 ${glow * 0.8}px ${color},
+              0 0 ${glow * 2.8}px ${color},
+              inset 0 0 ${glow * 1.3}px ${color}`,
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: color,
+    borderRadius: 8,
+  };
+};
 
 export const selectedBorder = (selected: boolean, color: string) =>
   selected
