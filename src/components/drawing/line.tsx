@@ -99,7 +99,7 @@ export const LineI = (props: ILineProps) => {
           onClick={(event) => {
             if (!interactive) return;
             console.log("| LINE CLICK clicked on line");
-            event.stopPropagation();
+            // event.stopPropagation();
             onDrawingSelect();
           }}
         />
@@ -176,7 +176,7 @@ export const Box = memo((props: ILineProps) => {
           }}
           onClick={(event) => {
             console.log("clicked on box");
-            event.stopPropagation();
+            if (selected) event.stopPropagation();
             onDrawingSelect();
           }}
         ></div>

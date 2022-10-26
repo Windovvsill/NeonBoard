@@ -1,3 +1,4 @@
+import { PanicProvider } from "contexts/PanicContext";
 import React, { ReactNode } from "react";
 import { FC } from "react";
 import { Board } from "../components/drawing/board";
@@ -12,8 +13,10 @@ export const LandingContainer = (props: { children?: ReactNode }) => {
         backgroundColor: "#000000",
       }}
     >
-      <Row>
-        <Board />
+      <Row paddingScale={0}>
+        <PanicProvider>
+          <Board />
+        </PanicProvider>
       </Row>
       {props.children}
     </div>

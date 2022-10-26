@@ -1,5 +1,9 @@
 import { colors } from "components/ds";
+import { neonBorder } from "components/ds/useTheme";
 import { usePrevious } from "components/hooks/usePrevious";
+import { Row } from "components/library/container";
+import { Delim } from "components/library/sugar";
+import { usePanicContext } from "contexts/PanicContext";
 import { importData } from "io/import";
 import React, { useCallback, useId, useRef, useState } from "react";
 import { useEffect } from "react";
@@ -55,6 +59,8 @@ interface Event {
 
 export const Board = () => {
   const boardId = useId();
+
+  const { panicMessages, panic, history } = usePanicContext();
 
   const [tool, setTool] = useState<Tools>(Tools.BOX);
   const [pendingCoords, setPendingCoords] = useState<[IPosition?, IPosition?]>(
@@ -132,6 +138,7 @@ export const Board = () => {
     setPendingCoords([]);
     if (tool === Tools.CLEAR) {
       setDrawings([]);
+      panic(`WARNING irrevocable loss of data`);
       return;
     }
     setTool(tool);
@@ -218,6 +225,7 @@ export const Board = () => {
       ref={boardRef}
       onClick={onBoardClick}
     >
+      <PanicBox messages={panicMessages} history={history} />
       {drawings.map((d) => (
         <Drawing
           {...d}
@@ -249,6 +257,9 @@ export const Board = () => {
       )}
 
       <ToolBar
+        sessionConnect={open}
+        sessionDisconnect={close}
+        sessionIsOpen={isOpen}
         onSelect={resetTool}
         selected={tool}
         onImport={(content, filetype) => {
@@ -257,26 +268,12 @@ export const Board = () => {
           setDrawings(importData(filetype, content.toString()));
         }}
       />
-      {" pending: " +
-        JSON.stringify(pendingCoords) +
-        " mouse " +
-        mousePosition.x +
-        " boardId " +
-        boardId}
+
       <div
         onClick={(e) => {
           e.stopPropagation();
         }}
       >
-        <button disabled={isOpen} onClick={() => open()}>
-          {"open"}
-        </button>
-        <button disabled={!isOpen} onClick={() => close()}>
-          {"close"}
-        </button>
-        <button onClick={() => sendEvent("ping", { type: "ping" })}>
-          {"send"}
-        </button>
         {Object.entries(collabMice).map(([id, c]) => {
           // const color = reconcileColor(collabIds[id].joinOrder ?? 0);
           return (
@@ -330,7 +327,80 @@ export const Board = () => {
   );
 };
 
+const PanicBox = ({
+  messages,
+  history,
+}: {
+  messages: unknown[];
+  history: unknown[];
+}) => {
+  const [isHover, setIsHover] = useState(false);
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        zIndex: 8,
+        top: 0,
+        left: 0,
+
+        minWidth: "4px",
+        minHeight: "4px",
+
+        margin: "24px",
+
+        borderColor: colors.e,
+        borderRadius: 4,
+        borderWidth: "2px",
+        borderStyle: "solid",
+
+        color: colors.e,
+
+        backgroundColor: "inherit",
+      }}
+      onMouseEnter={() => setIsHover(true)}
+      onMouseLeave={() => setIsHover(false)}
+    >
+      {isHover &&
+        messages.length === 0 &&
+        history.map((message) => {
+          return (
+            <Row paddingScale={1}>
+              <label>{`${message}`}</label>
+            </Row>
+          );
+        })}
+      {messages.length > 0 && <Delim label="PANIC" />}
+      {messages.map((message) => {
+        return (
+          <Row paddingScale={1}>
+            <label>{`${message}`}</label>
+          </Row>
+        );
+      })}
+      {messages.length > 0 && <Delim label="- --" />}
+      {messages.length > 0 && (
+        <div
+          style={{
+            position: "absolute",
+            top: 12,
+            left: -12,
+            rotate: "270deg",
+          }}
+        >
+          <Delim
+            color={colors.b}
+            label={`SC-${Math.random().toString().slice(2, 6)}`}
+            scale={0.33}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
 const useConnection = (subscriptions: any) => {
+  const { panic } = usePanicContext();
   const socket = useRef<WebSocket>();
 
   // const ready = () => socket.current?.OPEN === 1;
@@ -355,6 +425,7 @@ const useConnection = (subscriptions: any) => {
     socket.current.addEventListener("close", (event) => {
       console.log("closing connection");
       setReady(false);
+      panic(event.code);
     });
 
     // Listen for messages
@@ -366,7 +437,8 @@ const useConnection = (subscriptions: any) => {
     });
 
     socket.current.addEventListener("error", (event) => {
-      console.error(event);
+      console.log(event.toString());
+      panic(`websocket error`);
     });
   };
 
