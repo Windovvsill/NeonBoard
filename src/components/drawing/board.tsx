@@ -398,7 +398,7 @@ const PanicBox = ({
   );
 };
 
-const useConnection = (subscriptions: Record<string, (s: string) => void>) => {
+const useConnection = (subscriptions: Record<string, (s: Event) => void>) => {
   const { panic } = usePanicContext();
   const socket = useRef<WebSocket>();
 
