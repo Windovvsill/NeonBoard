@@ -94,7 +94,7 @@ export const LineI = (props: ILineProps) => {
             transform: `rotate(${rotation}deg)`,
             ...selectedBorder(interactive && selected, theme.neonTubeD),
           }}
-          onClick={(_event) => {
+          onClick={() => {
             if (!interactive) return;
             console.log("| LINE CLICK clicked on line");
             // event.stopPropagation();
