@@ -14,6 +14,7 @@ const flexBase = (paddingScale?: number) => ({
   paddingTop: paddingScales[paddingScale ?? 1],
   paddingBottom: paddingScales[paddingScale ?? 1],
   justifyContent: "center",
+  alignItems: "center",
   display: "flex",
 });
 
