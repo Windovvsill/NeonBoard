@@ -2,7 +2,6 @@ import React, {
   createContext,
   PropsWithChildren,
   useContext,
-  useEffect,
   useRef,
   useState,
 } from "react";

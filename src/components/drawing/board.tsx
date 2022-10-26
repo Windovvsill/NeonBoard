@@ -1,5 +1,4 @@
 import { colors } from "components/ds";
-import { neonBorder } from "components/ds/useTheme";
 import { usePrevious } from "components/hooks/usePrevious";
 import { Row } from "components/library/container";
 import { Delim } from "components/library/sugar";
@@ -275,7 +274,7 @@ export const Board = () => {
         }}
       >
         {Object.entries(collabMice).map(([id, c]) => {
-          // const color = reconcileColor(collabIds[id].joinOrder ?? 0);
+          const color = reconcileColor(collabIds[id].joinOrder ?? 0);
           return (
             <div
               style={{
@@ -299,7 +298,7 @@ export const Board = () => {
                 enableBackground="new 0 0 28 28"
               >
                 <polygon
-                  fill={"#fff"}
+                  fill={color}
                   points="8.2,20.9 8.2,4.9 19.8,16.5 13,16.5 12.6,16.6 "
                 />
                 <polygon
@@ -399,7 +398,7 @@ const PanicBox = ({
   );
 };
 
-const useConnection = (subscriptions: any) => {
+const useConnection = (subscriptions: Record<string, (s: string) => void>) => {
   const { panic } = usePanicContext();
   const socket = useRef<WebSocket>();
 
@@ -417,7 +416,7 @@ const useConnection = (subscriptions: any) => {
     socket.current = new WebSocket("ws://localhost:5000/ws");
 
     // Connection opened
-    socket.current.addEventListener("open", (event) => {
+    socket.current.addEventListener("open", () => {
       setReady(true);
       console.log("socket opened");
     });

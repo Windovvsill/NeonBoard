@@ -22,8 +22,6 @@ interface ILineProps {
 const ArrowLineI = (props: ILineProps) => {
   const { coords } = props;
 
-  // const theme = useTheme();
-
   if (!check(coords)) return null;
 
   const { theta } = useGeometry(coords);
@@ -96,7 +94,7 @@ export const LineI = (props: ILineProps) => {
             transform: `rotate(${rotation}deg)`,
             ...selectedBorder(interactive && selected, theme.neonTubeD),
           }}
-          onClick={(event) => {
+          onClick={(_event) => {
             if (!interactive) return;
             console.log("| LINE CLICK clicked on line");
             // event.stopPropagation();

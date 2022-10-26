@@ -1,6 +1,5 @@
 import { PanicProvider } from "contexts/PanicContext";
 import React, { ReactNode } from "react";
-import { FC } from "react";
 import { Board } from "../components/drawing/board";
 import { Row } from "../components/library/container";
 
