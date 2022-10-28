@@ -71,7 +71,7 @@ export const ToolBar = ({
         zIndex: 7,
 
         borderWidth: "1px",
-        borderColor: colors.b,
+        borderColor: colors.maximumYellowRed,
         borderRadius: 4,
         borderStyle: "solid",
 
@@ -162,7 +162,11 @@ const ToolButton = <T extends string>({
   return (
     <div
       style={{
-        borderColor: bgColour ? colors.e : selected ? colors.b : "transparent",
+        borderColor: bgColour
+          ? colors.maximumRed
+          : selected
+          ? colors.maximumYellowRed
+          : "transparent",
         borderRadius: 4,
         borderWidth: "2px",
         borderStyle: "solid",
@@ -174,7 +178,7 @@ const ToolButton = <T extends string>({
       <button
         style={{
           margin: "2px",
-          borderColor: selected ? colors.b : "transparent",
+          borderColor: selected ? colors.maximumYellowRed : "transparent",
           borderRadius: 4,
           borderWidth: "2px",
 

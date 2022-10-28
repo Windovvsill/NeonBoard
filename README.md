@@ -2,11 +2,11 @@
 
 _Work in progress_
 
-A neon themed whitebaord for quick sketching and diagramming.
+A neon themed whiteboard for sketching and diagramming.
 
 Pure React.
 
-![Screenshot](docs/screenshot.png)
+![Screenshot](docs/ScreenShot2.png)
 
 # [Live Demo](https://neonboard.ca)
 
@@ -25,6 +25,6 @@ Pure React.
 - [ ] export json
 - [ ] color switcher per drawing
 - [ ] remove empty text areas
-- [ ] arrow drawing
+- [x] arrow drawing
 - [ ] drag lines past origin
 - [ ] snap arrows to Sidelines

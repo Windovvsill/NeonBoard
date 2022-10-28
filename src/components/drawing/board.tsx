@@ -348,12 +348,12 @@ const PanicBox = ({
 
         margin: "24px",
 
-        borderColor: colors.e,
+        borderColor: colors.maximumRed,
         borderRadius: 4,
         borderWidth: "2px",
         borderStyle: "solid",
 
-        color: colors.e,
+        color: colors.maximumRed,
 
         backgroundColor: "inherit",
       }}
@@ -388,7 +388,7 @@ const PanicBox = ({
           }}
         >
           <Delim
-            color={colors.b}
+            color={colors.maximumYellowRed}
             label={`SC-${Math.random().toString().slice(2, 6)}`}
             scale={0.33}
           />

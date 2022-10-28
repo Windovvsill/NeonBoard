@@ -26,22 +26,22 @@ type TModedTheme = {
 const themeMap: TModedTheme = {
   [ColorModes.DARK]: {
     default: {
-      neonTubeA: colors.a,
-      neonTubeB: colors.b,
-      neonTubeC: colors.c,
-      neonTubeD: colors.d,
-      primaryText: colors.white,
-      anchor: colors.white,
+      neonTubeA: colors.maximumRed,
+      neonTubeB: colors.seaGreen,
+      neonTubeC: colors.maximumYellowRed,
+      neonTubeD: colors.shockingPink,
+      primaryText: colors.snow,
+      anchor: colors.snow,
     },
   },
   [ColorModes.LIGHT]: {
     default: {
-      neonTubeA: colors.a,
-      neonTubeB: colors.b,
-      neonTubeC: colors.c,
-      neonTubeD: colors.d,
-      primaryText: colors.white,
-      anchor: colors.white,
+      neonTubeA: colors.seaGreen,
+      neonTubeB: colors.maximumYellowRed,
+      neonTubeC: colors.spanishOrange,
+      neonTubeD: colors.shockingPink,
+      primaryText: colors.snow,
+      anchor: colors.snow,
     },
   },
 };

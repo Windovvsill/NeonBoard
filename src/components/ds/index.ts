@@ -1,8 +1,11 @@
 export const colors = {
-  a: "#0CECDD",
-  b: "rgb(244, 180, 58)",
-  c: "#FF67E7",
-  d: "#C400FF",
-  e: "rgb(218, 35, 29)",
-  white: "#ffffff",
+  maximumYellowRed: "#F4B43A",
+  maximumRed: "#DA231D",
+  spanishOrange: "#E76C2C",
+  fireOpal: "#E35A56",
+  seaGreen: "#44BBA4",
+  greenBlueCrayola: "#3F88C5",
+  onyx: "#393E41",
+  shockingPink: "#F417B2",
+  snow: "#fffbff",
 };

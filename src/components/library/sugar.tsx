@@ -4,7 +4,7 @@ import React from "react";
 export const Delim = ({
   label,
   scale = 1,
-  color = colors.e,
+  color = colors.maximumRed,
 }: {
   label: string;
   scale?: number;
