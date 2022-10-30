@@ -26,8 +26,8 @@ type TModedTheme = {
 const themeMap: TModedTheme = {
   [ColorModes.DARK]: {
     default: {
-      neonTubeA: colors.maximumRed,
-      neonTubeB: colors.seaGreen,
+      neonTubeA: colors.erin,
+      neonTubeB: colors.maximumYellowRed,
       neonTubeC: colors.maximumYellowRed,
       neonTubeD: colors.shockingPink,
       primaryText: colors.snow,
@@ -75,7 +75,7 @@ export const neonBorder = (color: string, glowLevel: 0 | 1 | 2 | 3 = 1) => {
 export const selectedBorder = (selected: boolean, color: string) =>
   selected
     ? {
-        borderWidth: "1px",
+        borderWidth: "6px",
         borderStyle: "dotted",
         borderColor: color,
       }

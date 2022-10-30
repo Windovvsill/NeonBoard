@@ -87,8 +87,8 @@ export const LineI = (props: ILineProps) => {
         <div
           style={{
             position: "absolute",
-            top: y - (hyp - height) / 2 - halfContainer,
-            left: x + width / 2 - halfContainer,
+            top: y - (hyp - height) / 2 - halfContainer - 3, // half large border
+            left: x + width / 2 - halfContainer - 3, // half large border
             width: containerWidth,
             height: `${containerWidth + hyp}px`,
             transform: `rotate(${rotation}deg)`,
@@ -123,7 +123,10 @@ export const LineI = (props: ILineProps) => {
           right={right}
           bottom={bottom}
           anchorSize={anchorSize}
-          anchorStyle={neonBorder(theme.anchor)}
+          anchorStyle={{
+            ...neonBorder(theme.anchor),
+            backgroundColor: theme.anchor,
+          }}
           boardRef={boardRef}
           {...props}
         />
@@ -163,8 +166,8 @@ export const Box = memo((props: ILineProps) => {
         <div
           style={{
             position: "absolute",
-            top: top - 7,
-            left: left - 7,
+            top: top - 7 - 3,
+            left: left - 7 - 3,
             width: `${Math.abs(width)}px`,
             // width,
             // height,
@@ -200,7 +203,10 @@ export const Box = memo((props: ILineProps) => {
           {...props}
           {...restOfGeo}
           anchorSize={anchorSize}
-          anchorStyle={neonBorder(theme.anchor)}
+          anchorStyle={{
+            ...neonBorder(theme.anchor),
+            backgroundColor: theme.anchor,
+          }}
         />
       )}
     </div>
@@ -260,7 +266,10 @@ export const Text = memo((props: ILineProps) => {
           anchors={anchors}
           {...props}
           {...restOfGeo}
-          anchorStyle={neonBorder(theme.anchor)}
+          anchorStyle={{
+            ...neonBorder(theme.anchor),
+            backgroundColor: theme.anchor,
+          }}
           anchorSize={anchorSize}
         />
       )}
