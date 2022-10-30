@@ -1,5 +1,3 @@
-import { run } from "node:test";
-
 export const colors = {
   maximumYellowRed: "#F4B43A",
   maximumRed: "#DA231D",
