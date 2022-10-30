@@ -19,7 +19,8 @@
     "start": "PORT=3010 DEBUG=1 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "logs": "gcloud app logs tail -s neon-collab-service"
   },
   "eslintConfig": {
     "extends": [

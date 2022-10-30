@@ -218,8 +218,8 @@ export const Board = () => {
         width: "100vw",
         padding: 0,
         margin: 0,
-        backgroundColor: "#000000",
-        backgroundImage: `radial-gradient( circle 964.7px at 10% 20%,  rgba(0,0,12,1) 0%, rgba(10,10,7,1) 44%, rgba(12,12,22,1) 100.1% )`,
+        // backgroundColor: "#000000",
+        backgroundImage: `radial-gradient( circle 964.7px at 20% 20%,  ${colors.smokyBlack} 20%, ${colors.xiketic} 44%, ${colors.smokyBlack} 100% )`,
       }}
       ref={boardRef}
       onClick={onBoardClick}
@@ -411,9 +411,9 @@ const useConnection = (subscriptions: Record<string, (s: Event) => void>) => {
   };
 
   const open = () => {
-    console.log("creating localhost:5000");
-
-    socket.current = new WebSocket("ws://localhost:5000/ws");
+    socket.current = new WebSocket(
+      process.env.WS_BACKEND_URL || "ws://localhost:5000/ws"
+    );
 
     // Connection opened
     socket.current.addEventListener("open", () => {
@@ -421,10 +421,9 @@ const useConnection = (subscriptions: Record<string, (s: Event) => void>) => {
       console.log("socket opened");
     });
 
-    socket.current.addEventListener("close", (event) => {
-      console.log("closing connection");
+    socket.current.addEventListener("close", () => {
       setReady(false);
-      panic(event.code);
+      panic(`websocket closed`);
     });
 
     // Listen for messages
@@ -436,7 +435,7 @@ const useConnection = (subscriptions: Record<string, (s: Event) => void>) => {
     });
 
     socket.current.addEventListener("error", (event) => {
-      console.log(event.toString());
+      console.log(event);
       panic(`websocket error`);
     });
   };

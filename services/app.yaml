@@ -1,0 +1,24 @@
+runtime: go1.15
+
+# Websockets are ONLY available in the flex environment
+env: flex
+
+service: neon-collab-service
+
+env_variables:
+  GIN_MODE: release
+
+handlers:
+  - url: /.*
+    secure: always
+    script: auto
+# For applications which can take advantage of session affinity
+# (where the load balancer will attempt to route multiple connections from
+# the same user to the same App Engine instance), uncomment the following:
+
+# network:
+#   session_affinity: true
+
+# network:
+#   forwarded_ports:
+#     - 5000/tcp

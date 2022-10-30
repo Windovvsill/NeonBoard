@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	static "github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
@@ -124,5 +125,10 @@ func main() {
 
 	})
 
-	r.Run(":5000")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "5000"
+	}
+
+	r.Run(":" + port)
 }
