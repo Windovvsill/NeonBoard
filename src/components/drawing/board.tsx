@@ -1,4 +1,5 @@
 import { colors } from "components/ds";
+import { Cursor } from "components/gizmos/cursor";
 import { usePrevious } from "components/hooks/usePrevious";
 import { Row } from "components/library/container";
 import { Delim } from "components/library/sugar";
@@ -177,8 +178,11 @@ export const Board = () => {
       }
     };
     document.addEventListener("keydown", onKeyDown);
+
+    panic("loading firmware...");
+
     return () => document.removeEventListener("keydown", onKeyDown);
-  });
+  }, []);
 
   const removeDrawing = (id: Id) => {
     setDrawings((d) => d.filter((dd) => dd.id !== id));
@@ -188,7 +192,7 @@ export const Board = () => {
     if (
       previousSelectedDrawing &&
       drawings.find((dd) => dd.id === previousSelectedDrawing)?.tool ===
-        Tools.TEXT
+      Tools.TEXT
     ) {
       removeDrawing(previousSelectedDrawing);
     }
@@ -275,51 +279,7 @@ export const Board = () => {
       >
         {Object.entries(collabMice).map(([id, c]) => {
           const color = reconcileColor(collabIds[id].joinOrder ?? 0);
-          return (
-            <div
-              style={{
-                position: "absolute",
-                top: c.y,
-                left: c.x,
-                width: "28px",
-                // Ignore clicks!
-                pointerEvents: "none",
-              }}
-            >
-              <svg
-                version="1.1"
-                id="Layer_1"
-                xmlns="http://www.w3.org/2000/svg"
-                x="0px"
-                xmlSpace="preserve"
-                xmlnsXlink="http://www.w3.org/1999/xlink"
-                y="0px"
-                viewBox="0 0 28 28"
-                enableBackground="new 0 0 28 28"
-              >
-                <polygon
-                  fill={color}
-                  points="8.2,20.9 8.2,4.9 19.8,16.5 13,16.5 12.6,16.6 "
-                />
-                <polygon
-                  fill="#0ff"
-                  points="17.3,21.6 13.7,23.1 9,12 12.7,10.5 "
-                />
-                <rect
-                  fill="#f0f"
-                  x="12.5"
-                  y="13.6"
-                  transform="matrix(0.9221 -0.3871 0.3871 0.9221 -5.7605 6.5909)"
-                  width="2"
-                  height="8"
-                />
-                <polygon
-                  fill="#fff"
-                  points="9.2,7.3 9.2,18.5 12.2,15.6 12.6,15.5 17.4,15.5 "
-                />
-              </svg>
-            </div>
-          );
+          return <Cursor top={c.y} left={c.x} color={color} />
         })}
       </div>
     </div>
@@ -333,7 +293,18 @@ const PanicBox = ({
   messages: unknown[];
   history: unknown[];
 }) => {
+  const timer = useRef<NodeJS.Timeout>();
+
   const [isHover, setIsHover] = useState(false);
+
+  const requestOn = () => {
+    clearTimeout(timer.current);
+    setIsHover(true);
+  };
+
+  const requestOff = () => {
+    timer.current = setTimeout(() => setIsHover(false), 1000);
+  };
 
   return (
     <div
@@ -357,8 +328,8 @@ const PanicBox = ({
 
         backgroundColor: "inherit",
       }}
-      onMouseEnter={() => setIsHover(true)}
-      onMouseLeave={() => setIsHover(false)}
+      onMouseEnter={() => requestOn()}
+      onMouseLeave={requestOff}
     >
       {isHover &&
         messages.length === 0 &&
@@ -428,10 +399,17 @@ const useConnection = (subscriptions: Record<string, (s: Event) => void>) => {
 
     // Listen for messages
     socket.current.addEventListener("message", (event) => {
-      const p = JSON.parse(event.data);
-      console.log("Got message from server ", event.data, p);
-      if (!p) return;
-      subscriptions[p?.type]?.(p);
+      try {
+
+        const p = JSON.parse(event.data);
+        console.log("Got message from server ", event.data, p);
+
+        if (!p) return;
+
+        subscriptions[p?.type]?.(p);
+      } catch (error) {
+        console.log(`Got a string from the server. Probably just some info: "${event.data}"`);
+      }
     });
 
     socket.current.addEventListener("error", (event) => {

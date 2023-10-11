@@ -26,8 +26,8 @@ type TModedTheme = {
 const themeMap: TModedTheme = {
   [ColorModes.DARK]: {
     default: {
-      neonTubeA: colors.erin,
-      neonTubeB: colors.maximumYellowRed,
+      neonTubeA: colors.maximumRed,
+      neonTubeB: colors.spanishOrange,
       neonTubeC: colors.maximumYellowRed,
       neonTubeD: colors.shockingPink,
       primaryText: colors.snow,
@@ -56,7 +56,7 @@ export const useTheme = () => {
 
 const glowBase = 4;
 
-export const neonBorder = (color: string, glowLevel: 0 | 1 | 2 | 3 = 1) => {
+export const neonBorder = (color: string, glowLevel = 0.25) => {
   const glow = glowBase * glowLevel;
   return {
     boxShadow: `0 0 ${glow / 5}px #fff,
@@ -75,8 +75,8 @@ export const neonBorder = (color: string, glowLevel: 0 | 1 | 2 | 3 = 1) => {
 export const selectedBorder = (selected: boolean, color: string) =>
   selected
     ? {
-        borderWidth: "6px",
-        borderStyle: "dotted",
-        borderColor: color,
-      }
+      borderWidth: "2px",
+      borderStyle: "dotted",
+      borderColor: color,
+    }
     : {};

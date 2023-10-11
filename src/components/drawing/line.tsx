@@ -84,7 +84,21 @@ export const LineI = (props: ILineProps) => {
         listenerNode={boardRef}
         bypass={!interactive}
       >
-        <div
+        <SelectedBorder
+          color={theme.neonTubeA}
+          visible={selected}
+          onClick={(event) => {
+            console.log("clicked on line");
+            if (selected) event.stopPropagation();
+            onDrawingSelect();
+          }}
+          top={y - (hyp - height) / 2}
+          left={x + width / 2 - halfContainer}
+          width={containerWidth}
+          height={hyp}
+          transform={`rotate(${rotation}deg)`}
+        />
+        {/* <div
           style={{
             position: "absolute",
             top: y - (hyp - height) / 2 - halfContainer - 3, // half large border
@@ -100,7 +114,7 @@ export const LineI = (props: ILineProps) => {
             // event.stopPropagation();
             onDrawingSelect();
           }}
-        />
+        /> */}
       </Draggable>
       <div
         style={{
@@ -137,7 +151,28 @@ export const LineI = (props: ILineProps) => {
 
 export const Line = memo(LineI);
 
-const anchorSize = 12;
+const anchorSize = 6;
+const selectedBuffer = 8;
+
+const SelectedBorder = ({ onClick, width, height, top, left, visible, transform, color }:
+  { visible: boolean, top: number, left: number; height: number; width: number; onClick: (event: any) => void, transform?: string, color: string }
+) => {
+  const theme = useTheme();
+
+  return < div
+    style={{
+      position: "absolute",
+      top: top - selectedBuffer,
+      left: left - selectedBuffer,
+      width: `${Math.abs(width) + selectedBuffer * 2}px`,
+      height: `${Math.abs(height) + selectedBuffer * 2}px`,
+      padding: "0px",
+      transform,
+      ...selectedBorder(visible, color),
+    }}
+    onClick={onClick}
+  ></div >
+};
 
 export const Box = memo((props: ILineProps) => {
   const { coords, onDrawingSelect, boardRef, selected, onPositionUpdate } =
@@ -163,24 +198,19 @@ export const Box = memo((props: ILineProps) => {
         coords={coords}
         listenerNode={boardRef}
       >
-        <div
-          style={{
-            position: "absolute",
-            top: top - 7 - 3,
-            left: left - 7 - 3,
-            width: `${Math.abs(width)}px`,
-            // width,
-            // height,
-            height: `${Math.abs(height)}px`,
-            padding: "8px",
-            ...selectedBorder(selected, theme.neonTubeC),
-          }}
+        <SelectedBorder
+          color={theme.neonTubeC}
+          visible={selected}
           onClick={(event) => {
             console.log("clicked on box");
             if (selected) event.stopPropagation();
             onDrawingSelect();
           }}
-        ></div>
+          top={top}
+          left={left}
+          width={width}
+          height={height}
+        />
       </Draggable>
 
       <SideLine alignment="top" {...restOfGeo} width={width} height={height} />
@@ -291,10 +321,6 @@ export const Text = memo((props: ILineProps) => {
             left,
             width: Math.abs(width),
             height: Math.abs(height),
-            // border: `2px solid ${theme.neonTubeA}`,
-            // borderRadius: 8,
-            borderColor: "transparent",
-            borderStyle: "none",
             outline: "none",
             overflow: "auto",
             backgroundColor: "#ffffff00",

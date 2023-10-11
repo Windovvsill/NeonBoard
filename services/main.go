@@ -64,19 +64,31 @@ func main() {
 			currSession.Write([]byte("set " + info.ID + " " + info.X + " " + info.Y))
 		}
 
-		currSession.Write([]byte("iam " + id))
+		currSession.Write([]byte("i am " + id))
 	})
 
 	m.HandleDisconnect(func(s *melody.Session) {
 		info := s.MustGet("info").(*ToolInfo)
 		m.BroadcastOthers([]byte("disconnected "+info.ID), s)
+
+		action := struct {
+			info   ToolInfo
+			action string
+		}{
+			*info,
+			"disconnect",
+		}
+
+		bs, _ := json.Marshal(action)
+
+		m.BroadcastOthers(bs, s)
 	})
 
 	m.HandleMessage(func(s *melody.Session, msg []byte) {
 		var action Action
 		json.Unmarshal(msg, &action)
 
-		fmt.Println("Receiving message " + action.Type + " " + fmt.Sprintf("%f", action.Coords[0].X))
+		fmt.Println("Receiving message: " + action.Type + " " + fmt.Sprintf("%f", action.Coords[0].X))
 
 		switch action.Type {
 		case "updateSingleDrawingPosition":
@@ -92,7 +104,7 @@ func main() {
 			{
 				fmt.Printf("action.EventId: %v\n", action.EventId)
 				fmt.Printf("action.BoardId: %v\n", action.BoardId)
-				fmt.Printf("action.mousePosition: %v\n", action.MousePosition)
+				fmt.Printf("action.MousePosition: %v\n", action.MousePosition)
 
 				bs, _ := json.Marshal(action)
 
