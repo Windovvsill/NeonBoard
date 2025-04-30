@@ -111,7 +111,7 @@ export const Board = () => {
   const sendEvent = (type: EventType, payload: object) => {
     const event = JSON.stringify({
       boardId,
-      eventId: String(Math.random()), // TODO: ????
+      eventId: `${boardId}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       ...payload,
       type,
     });
@@ -156,7 +156,7 @@ export const Board = () => {
   }, [pendingCoords]);
 
   const onBoardClick = (e: { clientX: number; clientY: number }) => {
-    console.log("BOARD CAPTURED CLICK");
+    console.log("BOARD CAPTURED CLICK!");
     if (selectedDrawing !== undefined) {
       setSelectedDrawing(undefined);
       return;

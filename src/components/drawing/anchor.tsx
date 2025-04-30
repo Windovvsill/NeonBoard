@@ -36,11 +36,10 @@ export const AnchorSet = ({
         <Draggable
           coords={coords}
           listenerNode={boardRef}
-          onPositionUpdate={(e) => {
-            console.log("anchor drag");
-            const newCoords = e.map((ee, i) => ({
-              x: anchor.mutablePositionFilter[i].x ? e[i].x : coords[i]?.x,
-              y: anchor.mutablePositionFilter[i].y ? e[i].y : coords[i]?.y,
+          onPositionUpdate={(positions) => {
+            const newCoords = positions.map((pos, i) => ({
+              x: anchor.mutablePositionFilter[i].x ? pos.x : coords[i]?.x,
+              y: anchor.mutablePositionFilter[i].y ? pos.y : coords[i]?.y,
             })) as [IPosition, IPosition];
             onPositionUpdate(newCoords);
           }}
