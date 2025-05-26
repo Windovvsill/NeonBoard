@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { IPosition } from "../../types/types";
 
 interface IDraggableProps {
@@ -17,15 +17,41 @@ export const Draggable = ({
   bypass = false,
 }: IDraggableProps) => {
   const node = useRef<HTMLDivElement>();
+  const thisNode = listenerNode || node.current;
 
-  const [dragFrom, setDragFrom] = useState<{
+  const dragFrom = useRef<{
     clientX: number;
     clientY: number;
   } | null>(null);
 
+  const onDrag = useCallback(({ clientX, clientY }: MouseEvent) => {
+    console.log(
+      "&ondrag, dragfrom:",
+      dragFrom.current,
+      "mouse position",
+      clientX,
+      clientY
+    );
+    updateOffset({ clientX, clientY });
+  }, []);
+
   const onDragStart = ({ clientX, clientY }: MouseEvent) => {
     console.log("ON DRAG START", clientX, clientY);
-    setDragFrom({ clientX, clientY });
+    dragFrom.current = { clientX, clientY };
+
+    thisNode?.addEventListener("mousemove", onDrag);
+  };
+
+  const onDragEnd = () => {
+    dragFrom.current = null;
+
+    thisNode?.removeEventListener("mousemove", onDrag);
+  };
+
+  const onClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (dragFrom.current) {
+      e.stopPropagation();
+    }
   };
 
   useEffect(() => {
@@ -33,24 +59,8 @@ export const Draggable = ({
   }, [coords]);
 
   useEffect(() => {
-    const onDrag = ({ clientX, clientY }: MouseEvent) => {
-      console.log(
-        "&ondrag, dragfrom:",
-        dragFrom,
-        "mouse position",
-        clientX,
-        clientY
-      );
-      updateOffset({ clientX, clientY });
-    };
-
-    // const n = findDOMNode(this);
-    const thisNode = listenerNode || node.current;
-
-    if (dragFrom) thisNode?.addEventListener("mousemove", onDrag);
-    else thisNode?.removeEventListener("mousemove", onDrag);
     return () => thisNode?.removeEventListener("mousemove", onDrag);
-  }, [dragFrom]);
+  }, []);
 
   const updateOffset = ({
     clientX,
@@ -59,9 +69,14 @@ export const Draggable = ({
     clientX: number;
     clientY: number;
   }) => {
+    if (!dragFrom.current) {
+      console.log("no drag from, cannot update position");
+      return;
+    }
+
     const offset = {
-      clientX: clientX - (dragFrom?.clientX ?? 0),
-      clientY: clientY - (dragFrom?.clientY ?? 0),
+      clientX: clientX - (dragFrom.current?.clientX ?? 0),
+      clientY: clientY - (dragFrom.current?.clientY ?? 0),
     };
 
     console.log("offset", offset);
@@ -78,14 +93,10 @@ export const Draggable = ({
         },
       ]);
 
-      console.log("updating position", "dragfrom:", dragFrom);
+      console.log("updating position", "dragfrom:", dragFrom.current);
 
-      if (dragFrom) setDragFrom({ clientX, clientY });
+      // if (dragFrom) setDragFrom({ clientX, clientY });
     }
-  };
-
-  const onDragEnd = () => {
-    setDragFrom(null);
   };
 
   if (bypass) return React.cloneElement(React.Children.only(children), {});
@@ -96,5 +107,7 @@ export const Draggable = ({
     // when the user drags quickly and leaves the bounds of the element.
     onMouseDown: onDragStart,
     onMouseUp: onDragEnd,
+    onMouseLeave: onDragEnd,
+    onClick,
   });
 };

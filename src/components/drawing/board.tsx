@@ -148,7 +148,7 @@ export const Board = () => {
     setTracking(pendingCoords.length === 1);
 
     if (pendingCoords.length === 2) {
-      const id = Date.now();
+      const id = `drawing-${tool}-${new Date().toISOString()}`;
       setDrawings((d) => [...d, { tool, coords: pendingCoords, id }]);
       setPendingCoords([]);
       setSelectedDrawing(id);
@@ -156,7 +156,7 @@ export const Board = () => {
   }, [pendingCoords]);
 
   const onBoardClick = (e: { clientX: number; clientY: number }) => {
-    console.log("BOARD CAPTURED CLICK!");
+    console.log("BOARD CAPTURED CLICK! this will unselect the drawing if it is selected");
     if (selectedDrawing !== undefined) {
       setSelectedDrawing(undefined);
       return;
@@ -189,12 +189,17 @@ export const Board = () => {
   };
 
   const onDrawingSelect = useCallback((id: Id) => {
+    console.log("onDrawingSelect", id);
+    return setSelectedDrawing(id);
+
     if (
       previousSelectedDrawing &&
       drawings.find((dd) => dd.id === previousSelectedDrawing)?.tool ===
       Tools.TEXT
     ) {
-      removeDrawing(previousSelectedDrawing);
+      // Selecting the previously selected drawing
+      // Let's do nothing?
+      // removeDrawing(previousSelectedDrawing);
     }
     setSelectedDrawing(id);
   }, []);

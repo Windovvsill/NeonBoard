@@ -189,21 +189,21 @@ export const Box = memo((props: ILineProps) => {
   const anchors = useAnchors({ anchorSize, coords });
 
   return (
-    <div>
-      <Draggable
-        onPositionUpdate={(e) => {
-          console.log("box drag");
-          onPositionUpdate(e);
-        }}
-        coords={coords}
-        listenerNode={boardRef}
-      >
+    <Draggable
+      onPositionUpdate={(e) => {
+        console.log("box drag");
+        onPositionUpdate(e);
+      }}
+      coords={coords}
+      listenerNode={boardRef}
+    >
+      <div>
         <SelectedBorder
           color={theme.neonTubeC}
           visible={selected}
           onClick={(event) => {
-            console.log("clicked on box");
-            if (selected) event.stopPropagation();
+            console.log("clicked on box...");
+            event.stopPropagation();
             onDrawingSelect();
           }}
           top={top}
@@ -211,35 +211,35 @@ export const Box = memo((props: ILineProps) => {
           width={width}
           height={height}
         />
-      </Draggable>
 
-      <SideLine alignment="top" {...restOfGeo} width={width} height={height} />
-      <SideLine alignment="left" {...restOfGeo} width={width} height={height} />
-      <SideLine
-        alignment="right"
-        {...restOfGeo}
-        width={width}
-        height={height}
-      />
-      <SideLine
-        alignment="bottom"
-        {...restOfGeo}
-        width={width}
-        height={height}
-      />
-      {selected && (
-        <AnchorSet
-          anchors={anchors}
-          {...props}
+        <SideLine alignment="top" {...restOfGeo} width={width} height={height} />
+        <SideLine alignment="left" {...restOfGeo} width={width} height={height} />
+        <SideLine
+          alignment="right"
           {...restOfGeo}
-          anchorSize={anchorSize}
-          anchorStyle={{
-            ...neonBorder(theme.anchor),
-            backgroundColor: theme.anchor,
-          }}
+          width={width}
+          height={height}
         />
-      )}
-    </div>
+        <SideLine
+          alignment="bottom"
+          {...restOfGeo}
+          width={width}
+          height={height}
+        />
+        {selected && (
+          <AnchorSet
+            anchors={anchors}
+            {...props}
+            {...restOfGeo}
+            anchorSize={anchorSize}
+            anchorStyle={{
+              ...neonBorder(theme.anchor),
+              backgroundColor: theme.anchor,
+            }}
+          />
+        )}
+      </div>
+    </Draggable>
   );
 });
 
