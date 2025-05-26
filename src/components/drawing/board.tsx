@@ -207,12 +207,20 @@ export const Board = () => {
   const updateSingleDrawingPosition = useCallback(
     (id: Id, position: [IPosition, IPosition]) => {
       const t = drawings.find((d) => d.id === id);
+      if (!t) {
+        console.warn(`drawing ${id} not found, not updating`);
+        return;
+      }
+
       console.log(
-        "message to update single drawing from:",
-        t?.coords,
+        `message to update single drawing ${t.id} from:`,
+        t.coords,
         "to",
         position
       );
+      console.log(t)
+
+
       setDrawings(
         drawings.map((d) => (d.id === id ? { ...d, coords: position } : d))
       );
@@ -276,6 +284,19 @@ export const Board = () => {
           setDrawings(importData(filetype, content.toString()));
         }}
       />
+
+      <div style={{ userSelect: "none" }}>
+        {drawings.map((d) => {
+          return <div key={d.id} style={{ flex: 1, display: "flex", flexDirection: "row", justifyContent: "space-around", alignItems: "center" }}>
+            <p>{d.id}</p>
+            <Delim label="//:" />
+            <p>{`x1: ${d.coords[0]?.x}`}</p>
+            <p>{`y1: ${d.coords[0]?.y}`}</p>
+            <p>{`x2: ${d.coords[1]?.x}`}</p>
+            <p>{`y2: ${d.coords[1]?.y}`}</p>
+          </div>
+        })}
+      </div>
 
       <div
         onClick={(e) => {
