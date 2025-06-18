@@ -1,4 +1,11 @@
 {
   "workbench.colorTheme": "Tomorrow Night Blue",
-  "cSpell.words": ["Collab", "collabs", "Delim"]
+  "cSpell.words": ["Collab", "collabs", "Delim"],
+  "keyboard.shortcuts": [
+    {
+      "key": "cmd+r",
+      "command": "editor.action.referenceSearch.trigger",
+      "when": "editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor"
+    }
+  ]
 }

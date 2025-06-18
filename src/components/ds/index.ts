@@ -12,3 +12,8 @@ export const colors = {
   shockingPink: "#F417B2",
   snow: "#fffbff",
 };
+
+export const sensibles = {
+  anchorSize: 10,
+  selectedBorderBuffer: 8,
+}

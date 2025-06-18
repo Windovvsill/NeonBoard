@@ -1,3 +1,4 @@
+import { sensibles } from "components/ds";
 import { Draggable } from "components/utility/Draggable";
 import React from "react";
 import type {
@@ -14,7 +15,7 @@ type IAnchorSetProps = {
   boardRef?: HTMLDivElement | null;
   onPositionUpdate: (position: [IPosition, IPosition]) => void;
   anchorStyle: object;
-  anchorSize: number;
+  anchorSize?: number;
 } & IFourSides;
 
 export const AnchorSet = ({
@@ -23,7 +24,7 @@ export const AnchorSet = ({
   boardRef,
   onPositionUpdate,
   onDrawingSelect,
-  anchorSize,
+  anchorSize = sensibles.anchorSize,
   top,
   left,
   bottom,
@@ -51,6 +52,8 @@ export const AnchorSet = ({
               left: anchor.left({ top, left, bottom, right }),
               width: anchorSize,
               height: anchorSize,
+              zIndex: 10,
+              borderRadius: 100,
               ...anchorStyle,
             }}
             onClick={(e) => {

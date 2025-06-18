@@ -10,8 +10,10 @@ import { useEffect } from "react";
 import { Tools } from "../../types/enums";
 import type { Id, IDrawing, IPosition } from "../../types/types";
 import { useMousePosition } from "../hooks/useMousePosition";
-import { Line, Box, Text, ArrowLine } from "./line";
+import { Line, Text, ArrowLine } from "./line";
+import { Box } from "./box";
 import { ToolBar } from "./toolBar";
+import { useTheme } from "components/ds/useTheme";
 
 const toolComponents = {
   [Tools.LINE]: Line,
@@ -36,6 +38,9 @@ const Drawing = (
     selected: boolean;
     onPositionUpdate: (position: [IPosition, IPosition]) => void;
     boardRef?: HTMLDivElement | null;
+    xs?: {
+      [k: string]: any;
+    };
   }
 ) => {
   const render = () => {
@@ -59,6 +64,7 @@ interface Event {
 
 export const Board = () => {
   const boardId = useId();
+  const theme = useTheme();
 
   const { panicMessages, panic, history } = usePanicContext();
 
@@ -156,7 +162,9 @@ export const Board = () => {
   }, [pendingCoords]);
 
   const onBoardClick = (e: { clientX: number; clientY: number }) => {
-    console.log("BOARD CAPTURED CLICK! this will unselect the drawing if it is selected");
+    console.log(
+      "BOARD CAPTURED CLICK! this will unselect the drawing if it is selected"
+    );
     if (selectedDrawing !== undefined) {
       setSelectedDrawing(undefined);
       return;
@@ -195,7 +203,7 @@ export const Board = () => {
     if (
       previousSelectedDrawing &&
       drawings.find((dd) => dd.id === previousSelectedDrawing)?.tool ===
-      Tools.TEXT
+        Tools.TEXT
     ) {
       // Selecting the previously selected drawing
       // Let's do nothing?
@@ -218,11 +226,10 @@ export const Board = () => {
         "to",
         position
       );
-      console.log(t)
+      console.log(t);
 
-
-      setDrawings(
-        drawings.map((d) => (d.id === id ? { ...d, coords: position } : d))
+      setDrawings((currents) =>
+        currents.map((d) => (d.id === id ? { ...d, coords: position } : d))
       );
     },
     [drawings]
@@ -236,7 +243,7 @@ export const Board = () => {
         padding: 0,
         margin: 0,
         // backgroundColor: "#000000",
-        backgroundImage: `radial-gradient( circle 964.7px at 20% 20%,  ${colors.smokyBlack} 20%, ${colors.xiketic} 44%, ${colors.smokyBlack} 100% )`,
+        backgroundImage: `radial-gradient( circle 964.7px at 20% 20%,  ${theme.background} 20%, ${colors.xiketic} 44%, ${colors.smokyBlack} 100% )`,
       }}
       ref={boardRef}
       onClick={onBoardClick}
@@ -247,6 +254,13 @@ export const Board = () => {
           {...d}
           boardRef={boardRef.current}
           key={d.id}
+          xs={
+            d.id === selectedDrawing
+              ? {
+                  zIndex: 9,
+                }
+              : {}
+          }
           onDrawingSelect={() => onDrawingSelect(d.id)}
           selected={d.id === selectedDrawing}
           onPositionUpdate={(coords) => {
@@ -287,14 +301,31 @@ export const Board = () => {
 
       <div style={{ userSelect: "none" }}>
         {drawings.map((d) => {
-          return <div key={d.id} style={{ flex: 1, display: "flex", flexDirection: "row", justifyContent: "space-around", alignItems: "center" }}>
-            <p>{d.id}</p>
-            <Delim label="//:" />
-            <p>{`x1: ${d.coords[0]?.x}`}</p>
-            <p>{`y1: ${d.coords[0]?.y}`}</p>
-            <p>{`x2: ${d.coords[1]?.x}`}</p>
-            <p>{`y2: ${d.coords[1]?.y}`}</p>
-          </div>
+          const selectedBorderStyle = {
+            border: `1px solid ${
+              selectedDrawing === d.id ? colors.shockingPink : "transparent"
+            }`,
+          };
+          return (
+            <div
+              key={d.id}
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-around",
+                alignItems: "center",
+                ...selectedBorderStyle,
+              }}
+            >
+              <p>{d.id}</p>
+              <Delim label="//:" />
+              <p style={{ minWidth: "80px" }}>{`x1: ${d.coords[0]?.x}`}</p>
+              <p style={{ minWidth: "80px" }}>{`y1: ${d.coords[0]?.y}`}</p>
+              <p>{`x2: ${d.coords[1]?.x}`}</p>
+              <p>{`y2: ${d.coords[1]?.y}`}</p>
+            </div>
+          );
         })}
       </div>
 
@@ -305,7 +336,7 @@ export const Board = () => {
       >
         {Object.entries(collabMice).map(([id, c]) => {
           const color = reconcileColor(collabIds[id].joinOrder ?? 0);
-          return <Cursor top={c.y} left={c.x} color={color} />
+          return <Cursor top={c.y} left={c.x} color={color} />;
         })}
       </div>
     </div>
@@ -426,7 +457,6 @@ const useConnection = (subscriptions: Record<string, (s: Event) => void>) => {
     // Listen for messages
     socket.current.addEventListener("message", (event) => {
       try {
-
         const p = JSON.parse(event.data);
         console.log("Got message from server ", event.data, p);
 
@@ -434,7 +464,9 @@ const useConnection = (subscriptions: Record<string, (s: Event) => void>) => {
 
         subscriptions[p?.type]?.(p);
       } catch (error) {
-        console.log(`Got a string from the server. Probably just some info: "${event.data}"`);
+        console.log(
+          `Got a string from the server. Probably just some info: "${event.data}"`
+        );
       }
     });
 

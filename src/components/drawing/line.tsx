@@ -1,11 +1,12 @@
 import { check, toRadians } from "../../utils";
 import React, { memo } from "react";
-import type { Id, IFourSides, IPosition } from "../../types/types";
+import type { Id, IPosition } from "../../types/types";
 import { useAnchors } from "../hooks/useAnchors";
 import { Draggable } from "../utility/Draggable";
 import { useGeometry } from "components/hooks/useGeometry";
 import { AnchorSet } from "./anchor";
 import { neonBorder, selectedBorder, useTheme } from "components/ds/useTheme";
+import { SelectedBorder } from "./shared/selectedBorder";
 
 interface ILineProps {
   coords: [IPosition?, IPosition?];
@@ -152,130 +153,6 @@ export const LineI = (props: ILineProps) => {
 export const Line = memo(LineI);
 
 const anchorSize = 6;
-const selectedBuffer = 8;
-
-const SelectedBorder = ({ onClick, width, height, top, left, visible, transform, color }:
-  { visible: boolean, top: number, left: number; height: number; width: number; onClick: (event: any) => void, transform?: string, color: string }
-) => {
-  const theme = useTheme();
-
-  return < div
-    style={{
-      position: "absolute",
-      top: top - selectedBuffer,
-      left: left - selectedBuffer,
-      width: `${Math.abs(width) + selectedBuffer * 2}px`,
-      height: `${Math.abs(height) + selectedBuffer * 2}px`,
-      padding: "0px",
-      transform,
-      ...selectedBorder(visible, color),
-    }}
-    onClick={onClick}
-  ></div >
-};
-
-export const Box = memo((props: ILineProps) => {
-  const { coords, onDrawingSelect, boardRef, selected, onPositionUpdate } =
-    props;
-
-  const theme = useTheme();
-
-  if (!check(coords)) return null;
-
-  const { height, width, ...restOfGeo } = useGeometry(coords);
-
-  const { top, left } = restOfGeo;
-
-  const anchors = useAnchors({ anchorSize, coords });
-
-  return (
-    <Draggable
-      onPositionUpdate={(e) => {
-        console.log("box drag");
-        onPositionUpdate(e);
-      }}
-      coords={coords}
-      listenerNode={boardRef}
-    >
-      <div>
-        <SelectedBorder
-          color={theme.neonTubeC}
-          visible={selected}
-          onClick={(event) => {
-            console.log("clicked on box...");
-            event.stopPropagation();
-            onDrawingSelect();
-          }}
-          top={top}
-          left={left}
-          width={width}
-          height={height}
-        />
-
-        <SideLine alignment="top" {...restOfGeo} width={width} height={height} />
-        <SideLine alignment="left" {...restOfGeo} width={width} height={height} />
-        <SideLine
-          alignment="right"
-          {...restOfGeo}
-          width={width}
-          height={height}
-        />
-        <SideLine
-          alignment="bottom"
-          {...restOfGeo}
-          width={width}
-          height={height}
-        />
-        {selected && (
-          <AnchorSet
-            anchors={anchors}
-            {...props}
-            {...restOfGeo}
-            anchorSize={anchorSize}
-            anchorStyle={{
-              ...neonBorder(theme.anchor),
-              backgroundColor: theme.anchor,
-            }}
-          />
-        )}
-      </div>
-    </Draggable>
-  );
-});
-
-interface ISideLineProps {
-  alignment: "top" | "bottom" | "right" | "left";
-  width: number;
-  height: number;
-}
-
-const SideLine = ({
-  alignment,
-  top,
-  left,
-  bottom,
-  right,
-  width,
-  height,
-}: ISideLineProps & IFourSides) => {
-  const theme = useTheme();
-
-  const isVertical = alignment === "left" || alignment === "right";
-
-  return (
-    <div
-      style={{
-        position: "absolute",
-        top: alignment === "bottom" ? bottom : top,
-        left: alignment === "right" ? right : left,
-        width: isVertical ? 0 : Math.abs(width),
-        height: !isVertical ? 0 : Math.abs(height),
-        backgroundColor: theme.neonTubeA,
-        ...neonBorder(theme.neonTubeA),
-      }}
-    />
-  );
-};
 
 export const Text = memo((props: ILineProps) => {
   const { coords, onDrawingSelect, stopPropagation, selected, text } = props;
@@ -325,7 +202,7 @@ export const Text = memo((props: ILineProps) => {
             overflow: "auto",
             backgroundColor: "#ffffff00",
             color: theme.primaryText,
-            ...selectedBorder(selected, theme.neonTubeD),
+            ...selectedBorder(theme.neonTubeD, selected),
           }}
         />
       </Draggable>

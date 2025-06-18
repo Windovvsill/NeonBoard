@@ -7,6 +7,7 @@ const enum ColorModes {
 }
 
 interface ITheme {
+  background: string;
   neonTubeA: string;
   neonTubeB: string;
   neonTubeC: string;
@@ -26,6 +27,7 @@ type TModedTheme = {
 const themeMap: TModedTheme = {
   [ColorModes.DARK]: {
     default: {
+      background: colors.smokyBlack,
       neonTubeA: colors.maximumRed,
       neonTubeB: colors.spanishOrange,
       neonTubeC: colors.maximumYellowRed,
@@ -36,6 +38,7 @@ const themeMap: TModedTheme = {
   },
   [ColorModes.LIGHT]: {
     default: {
+      background: colors.snow,
       neonTubeA: colors.seaGreen,
       neonTubeB: colors.maximumYellowRed,
       neonTubeC: colors.spanishOrange,
@@ -65,17 +68,17 @@ export const neonBorder = (color: string, glowLevel = 0.25) => {
               0 0 ${glow * 0.8}px ${color},
               0 0 ${glow * 2.8}px ${color},
               inset 0 0 ${glow * 1.3}px ${color}`,
-    borderWidth: "2px",
+    borderWidth: "1px",
     borderStyle: "solid",
     borderColor: color,
     borderRadius: 8,
   };
 };
 
-export const selectedBorder = (selected: boolean, color: string) =>
+export const selectedBorder = (color: string, selected = true) =>
   selected
     ? {
-      borderWidth: "2px",
+      borderWidth: "1px",
       borderStyle: "dotted",
       borderColor: color,
     }

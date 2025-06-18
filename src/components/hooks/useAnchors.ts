@@ -1,9 +1,10 @@
+import { sensibles } from "components/ds";
 import type { Anchors, IPosition, MPF } from "../../types/types";
 import { pipe } from "../../utils";
 
 interface IAnchorProps {
   /** Used to determine the proper offset */
-  anchorSize: number;
+  anchorSize?: number;
   /**
    * Coords of the drawing, used to determine the relative
    * position of coordinates.
@@ -13,7 +14,7 @@ interface IAnchorProps {
 }
 
 export const useAnchors = ({
-  anchorSize,
+  anchorSize = sensibles.anchorSize,
   coords,
   filterAnchors,
 }: IAnchorProps) => {
@@ -48,32 +49,32 @@ export const useAnchors = ({
 
   const anchors: Anchors[] = [
     {
-      top: ({ top }) => top - anchorSize * 1.5,
-      left: ({ left }) => left - anchorSize * 1.5,
+      top: ({ top }) => top - sensibles.selectedBorderBuffer - anchorSize / 2,
+      left: ({ left }) => left - sensibles.selectedBorderBuffer - anchorSize / 2,
       mutablePositionFilter: flipPositionFilter([
         { x: true, y: true },
         { x: false, y: false },
       ]),
     },
     {
-      top: ({ bottom }) => bottom + anchorSize,
-      left: ({ left }) => left - anchorSize * 1.5,
+      top: ({ bottom }) => bottom + anchorSize / 2 - 2,
+      left: ({ left }) => left - anchorSize / 2 - sensibles.selectedBorderBuffer,
       mutablePositionFilter: flipPositionFilter([
         { x: true, y: false },
         { x: false, y: true },
       ]),
     },
     {
-      top: ({ top }) => top - anchorSize * 1.5,
-      left: ({ right }) => right + anchorSize,
+      top: ({ top }) => top - anchorSize / 2 - sensibles.selectedBorderBuffer,
+      left: ({ right }) => right + sensibles.selectedBorderBuffer - anchorSize / 2,
       mutablePositionFilter: flipPositionFilter([
         { x: false, y: true },
         { x: true, y: false },
       ]),
     },
     {
-      top: ({ bottom }) => bottom + anchorSize,
-      left: ({ right }) => right + anchorSize,
+      top: ({ bottom }) => bottom + anchorSize / 2 - 2,
+      left: ({ right }) => right + sensibles.selectedBorderBuffer - anchorSize / 2,
       mutablePositionFilter: flipPositionFilter([
         { x: false, y: false },
         { x: true, y: true },
